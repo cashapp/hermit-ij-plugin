@@ -9,10 +9,10 @@ plugins {
 }
 
 // The latest supported versions
-def IJ_VERSION = '211.6693.111'
-def GO_PLUGIN_VERSION = '211.6693.111'
+def IJ_VERSION = '211.7142.45'
+def GO_PLUGIN_VERSION = '211.7142.36'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
-def GOLAND_VERSION = '211.6693.76'
+def GOLAND_VERSION = '211.7142.13'
 // Test that the plugin still works on old releases
 def IJ_FROM_VERSION = '203.6682.168'
 def GOLAND_FROM_VERSION = '203.6682.164'
