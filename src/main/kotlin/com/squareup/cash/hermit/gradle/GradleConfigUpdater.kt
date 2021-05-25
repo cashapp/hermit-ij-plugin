@@ -16,10 +16,10 @@ class GradleConfigUpdater : HermitPropertyHandler {
             if (settings == null) {
                 ApplicationManager.getApplication()?.runWriteAction {
 
-                    val settings = GradleProjectSettings()
-                    settings.gradleHome = hermitPackage.path
-                    settings.distributionType = DistributionType.LOCAL
-                    GradleUtils.insertNewProjectSettings(project, settings)
+                    val newSettings = GradleProjectSettings()
+                    newSettings.gradleHome = hermitPackage.path
+                    newSettings.distributionType = DistributionType.LOCAL
+                    GradleUtils.insertNewProjectSettings(project, newSettings)
                 }
             } else if (!isUpToDate(settings, hermitPackage)) {
                 ApplicationManager.getApplication()?.runWriteAction {

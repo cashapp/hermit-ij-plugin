@@ -4,15 +4,19 @@ plugins {
     id "idea"
     id "java"
     id 'org.jetbrains.intellij' version '0.6.5'
-    id 'org.jetbrains.kotlin.jvm' version '1.5.0'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.32'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.32'
+}
+
+ext {
+    kotlin_version = '1.4.32'
 }
 
 // The latest supported versions
-def IJ_VERSION = '211.6693.111'
-def GO_PLUGIN_VERSION = '211.6693.111'
+def IJ_VERSION = '211.7142.45'
+def GO_PLUGIN_VERSION = '211.7142.36'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
-def GOLAND_VERSION = '211.6693.76'
+def GOLAND_VERSION = '211.7142.13'
 // Test that the plugin still works on old releases
 def IJ_FROM_VERSION = '203.6682.168'
 def GOLAND_FROM_VERSION = '203.6682.164'
@@ -36,8 +40,9 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0'
 }
 
 intellij {
