@@ -1,0 +1,85 @@
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
+
+plugins {
+    id "idea"
+    id "java"
+    id 'org.jetbrains.intellij' version '0.6.5'
+    id 'org.jetbrains.kotlin.jvm' version '1.5.0'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.0'
+}
+
+// The latest supported versions
+def IJ_VERSION = '211.6693.111'
+def GO_PLUGIN_VERSION = '211.6693.111'
+// Unfortunately the GoLand releases do not completely match the Go plugin releases
+def GOLAND_VERSION = '211.6693.76'
+// Test that the plugin still works on old releases
+def IJ_FROM_VERSION = '203.6682.168'
+def GOLAND_FROM_VERSION = '203.6682.164'
+
+group 'com.squareup.cash.hermit'
+version project.getProperties().getOrDefault("version", '1.0-SNAPSHOT')
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.freeCompilerArgs = ["-Xjvm-default=enable"]
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://dl.bintray.com/arrow-kt/arrow-kt/" }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1'
+}
+
+intellij {
+    // Note: The IntelliJ version below needs to match the go plugin version as defined here:
+    // https://plugins.jetbrains.com/plugin/9568-go/versions
+    version IJ_VERSION
+    type = 'IU'
+    plugins "gradle", "java", "terminal", "org.jetbrains.plugins.go:" + GO_PLUGIN_VERSION
+}
+
+runIde {
+    // Uncomment this, and set your path accordingly, if you want to debug on GoLand
+    // ideDirectory '/Users/juho/Library/Application Support/JetBrains/Toolbox/apps/Goland/ch-0/203.6682.164/GoLand.app/Contents'
+}
+
+patchPluginXml {
+    sinceBuild '203.5981.41'
+}
+
+runPluginVerifier {
+    // These need to match the versions from
+    // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=DG,PS,DL,MPS,MPSIIP,RDCPPP,WS,AC,IIC,IIE,GO,CL,PCD,PCC,RD,PCE,IIU,RM,PCP
+    ideVersions = ['IIC-' + IJ_FROM_VERSION, 'GO-' + GOLAND_FROM_VERSION, 'IIC-'+ IJ_VERSION, 'GO-' + GOLAND_VERSION]
+    failureLevel = EnumSet.complementOf(
+            EnumSet.of(
+                    // skipping missing dependencies as com.intellij.java provided bi IJ raises a false warning
+                    RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES
+            )
+    )
+
+}
+
+apply plugin: 'kotlin-kapt'
+
+def arrow_version = "0.11.0"
+dependencies {
+    implementation "io.arrow-kt:arrow-core:$arrow_version"
+    implementation "io.arrow-kt:arrow-syntax:$arrow_version"
+    kapt    "io.arrow-kt:arrow-meta:$arrow_version"
+}
+
+// See https://youtrack.jetbrains.com/issue/KTIJ-782
+tasks.buildSearchableOptions {
+    enabled = false
+}

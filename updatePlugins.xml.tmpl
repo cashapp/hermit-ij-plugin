@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The <plugins> element contains the description of the plugins available at this repository. Required.
+-->
+<plugins>
+    <!--
+      Each <plugin> element describes one plugin in the repository. Required.
+      id - used by JetBrains IDEs to uniquely identify a plugin. Required. Must match <id> in plugin.xml
+      url - path to download the plugin JAR/ZIP file. Required. Must be HTTPS
+      version - version of this plugin. Required. Must match <version> in plugin.xml
+    -->
+    <plugin id="com.squareup.cash.hermit" url="https://d1abdrezunyhdp.cloudfront.net/PLUGIN_CHANNEL/hermit-idea-plugin-PLUGIN_VERSION.zip" version="PLUGIN_VERSION">
+        <idea-version since-build="203.6682" />
+        <name>Hermit</name>
+        <description>
+            <![CDATA[
+            <p>This plugin loads environment variables automatically from a <a href="https://github.com/squareup/hermit">Hermit</a> environment if one exists at the root of the project. The environment variables will be available in the terminal and executions.</p>
+
+            <p>If there is a JDK or Go environment in the Hermit environment, the user is shown a popup allowing them to use the SDK. If a Hermit managed SDK is used, it is automatically upgraded when upgraded in hermit.</p>
+
+            <p>All Hermit changes are automatically reflected in the IDE.</p>
+            ]]>
+        </description>
+    </plugin>
+</plugins>

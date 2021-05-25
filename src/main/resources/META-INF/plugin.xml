@@ -1,0 +1,52 @@
+<idea-plugin>
+    <id>org.squareup.cash.hermit.idea-plugin</id>
+    <version>PLUGIN_VERSION</version>
+
+    <name>Hermit</name>
+    <vendor email="juho@squareup.com" url="http://www.squareup.com">Square</vendor>
+
+    <description>
+        <![CDATA[
+        <p>This plugin loads environment variables automatically from a <a href="https://github.com/squareup/hermit">Hermit</a> environment if one exists at the root of the project. The environment variables will be available in the terminal and executions.</p>
+
+        <p>If there is a JDK or Go environment in the Hermit environment, the user is shown a popup allowing them to use the SDK. If a Hermit managed SDK is used, it is automatically upgraded when upgraded in hermit.</p>
+
+        <p>All Hermit changes are automatically reflected in the IDE.</p>
+        ]]>
+    </description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <projectListeners>
+        <listener class="com.squareup.cash.hermit.HermitVFSChangeListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener" />
+        <listener class="com.squareup.cash.hermit.HermitProjectManagerListener" topic="com.intellij.openapi.project.ProjectManagerListener" />
+    </projectListeners>
+
+    <applicationListeners>
+        <listener class="com.squareup.cash.hermit.HermitDynamicPluginListener" topic="com.intellij.ide.plugins.DynamicPluginListener" />
+    </applicationListeners>
+
+    <actions>
+        <action id="org.squareup.cash.hermit.enable"
+                class="com.squareup.cash.hermit.action.EnableHermitAction"
+                text="Yes" description="Enable Hermit for the Project">
+        </action>
+        <action id="org.squareup.cash.hermit.dont-enable"
+                class="com.squareup.cash.hermit.action.DontEnableHermitAction"
+                text="No" description="Don't enable Hermit for the Project">
+        </action>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolsCustomizer implementation="com.squareup.cash.hermit.execution.HermitToolsCustomiser" />
+    </extensions>
+
+    <extensionPoints>
+        <extensionPoint name="property-handler" interface="com.squareup.cash.hermit.HermitPropertyHandler" />
+    </extensionPoints>
+
+    <depends optional="true" config-file="idea.xml">com.intellij.java</depends>
+    <depends optional="true" config-file="gradle.xml">com.intellij.gradle</depends>
+    <depends optional="true" config-file="terminal.xml">org.jetbrains.plugins.terminal</depends>
+    <depends optional="true" config-file="goland.xml">org.jetbrains.plugins.go</depends>
+</idea-plugin>

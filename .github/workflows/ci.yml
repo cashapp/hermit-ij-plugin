@@ -1,0 +1,19 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+name: CI
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Init Hermit
+        run: ./bin/hermit env >> $GITHUB_ENV
+      - name: Test
+        run: gradle test
+      - name: Plugin verification
+        run: gradle runPluginVerifier

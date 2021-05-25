@@ -1,0 +1,10 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
+        <executionEnvironmentProvider implementation="com.squareup.cash.hermit.execution.HermitGradleAppEnvProvider" order="first" />
+        <executionEnvironmentProvider implementation="com.squareup.cash.hermit.execution.HermitGradleTaskEnvProvider" order="first" />
+    </extensions>
+
+    <extensions defaultExtensionNs="org.squareup.cash.hermit.idea-plugin">
+        <property-handler implementation="com.squareup.cash.hermit.gradle.GradleConfigUpdater" />
+    </extensions>
+</idea-plugin>
