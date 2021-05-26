@@ -7,7 +7,7 @@
 
     <description>
         <![CDATA[
-        <p>This plugin loads environment variables automatically from a <a href="https://github.com/squareup/hermit">Hermit</a> environment if one exists at the root of the project. The environment variables will be available in the terminal and executions.</p>
+        <p>This plugin loads environment variables automatically from a <a href="https://cashapp.github.io/hermit/">Hermit</a> environment if one exists at the root of the project. The environment variables will be available in the terminal and executions.</p>
 
         <p>If there is a JDK or Go environment in the Hermit environment, the user is shown a popup allowing them to use the SDK. If a Hermit managed SDK is used, it is automatically upgraded when upgraded in hermit.</p>
 
