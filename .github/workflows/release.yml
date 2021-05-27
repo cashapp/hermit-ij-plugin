@@ -14,7 +14,10 @@ jobs:
         run: |
           ./bin/hermit env >> $GITHUB_ENV
           ./bin/hermit install -d
-      - name: Publish IJ Plugin
+      - name: Test
+        run: |
+          ./bin/gradle test
+      - name: Publish
         env:
           JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_PLUGIN_TOKEN }}
         run: |
