@@ -60,6 +60,7 @@ runIde {
 
 patchPluginXml {
     sinceBuild '203.5981.41'
+    version = System.getenv("IJ_PLUGIN_VERSION")
 }
 
 runPluginVerifier {
@@ -73,6 +74,10 @@ runPluginVerifier {
             )
     )
 
+}
+
+publishPlugin {
+    token = System.getenv("JETBRAINS_TOKEN")
 }
 
 apply plugin: 'kotlin-kapt'

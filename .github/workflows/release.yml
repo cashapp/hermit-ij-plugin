@@ -14,8 +14,15 @@ jobs:
         run: |
           ./bin/hermit env >> $GITHUB_ENV
           ./bin/hermit install -d
-      - name: Build IJ Plugin
+      - name: Test
+        run: |
+          ./bin/gradle test
+      - name: Publish
+        env:
+          JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_PLUGIN_TOKEN }}
         run: |
           export IJ_PLUGIN_VERSION=$(git rev-parse HEAD | sed s,^v,,)
           echo "IJ_PLUGIN_VERSION=$IJ_PLUGIN_VERSION" >> $GITHUB_ENV
-          make PLUGIN_VERSION=$IJ_PLUGIN_VERSION PLUGIN_CHANNEL=stable
+
+          ./bin/gradle patchPluginXml
+          ./bin/gradle publishPlugin
