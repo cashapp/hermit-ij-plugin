@@ -7,7 +7,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import java.nio.file.Files
 import java.nio.file.Path
 
-data class TestPackage(val name: String, val version: String, val root: String, val env: Map<String, String>)
+data class TestPackage(val name: String, val version: String, val channel: String, val root: String, val env: Map<String, String>)
 
 data class FakeHermit(val packages: List<TestPackage>) {
     fun writeTo(path: Path) {
@@ -22,7 +22,8 @@ data class FakeHermit(val packages: List<TestPackage>) {
             .map { p -> JsonObject(mapOf(
                 "Reference" to JsonObject(mapOf(
                     "Name" to JsonPrimitive(p.name),
-                    "Version" to JsonPrimitive(p.version)
+                    "Version" to JsonPrimitive(p.version),
+                    "Channel" to JsonPrimitive(p.channel)
                 )),
                 "Root" to JsonPrimitive(p.root),
                 "Description" to JsonPrimitive("description")

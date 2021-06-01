@@ -21,7 +21,7 @@ class HermitGoEnvUpdater : HermitPropertyHandler {
                 // set it again to force re-indexing, and marking it as a valid one
                 || !sdk.isValid
             ) {
-                UI.showInfo(project, "Hermit", "Switching to SDK ${hermitPackage.name}:${hermitPackage.version}")
+                UI.showInfo(project, "Hermit", "Switching to SDK ${hermitPackage.displayName()}")
                 hermitPackage.setSdk(project)
             }
         }
