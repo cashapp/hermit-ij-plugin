@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.application.runWriteActionAndWait
+import com.intellij.openapi.externalSystem.service.execution.ExternalSystemJdkUtil
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.roots.ProjectRootManager
 import com.squareup.cash.hermit.gradle.GradleUtils
@@ -64,5 +65,19 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         Hermit(project).enable()
 
         TestCase.assertEquals("/root", GradleUtils.findGradleProjectSettings(project)?.gradleHome)
+    }
+
+    fun `test it sets the Gradle JDK home correctly, if both JDK and Gradle are present`() {
+        withHermit(FakeHermit(listOf(
+            TestPackage("gradle", "1.0", "/root", emptyMap()),
+            TestPackage("openjdk", "1.0", "/root", emptyMap())
+        )))
+        Hermit(project).enable()
+
+        TestCase.assertEquals("/root", GradleUtils.findGradleProjectSettings(project)?.gradleHome)
+        TestCase.assertEquals(ExternalSystemJdkUtil.USE_PROJECT_JDK, GradleUtils.findGradleProjectSettings(project)?.gradleJvm)
+
+        val sdk = ProjectRootManager.getInstance(project).projectSdk!!
+        ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk) }
     }
 }
