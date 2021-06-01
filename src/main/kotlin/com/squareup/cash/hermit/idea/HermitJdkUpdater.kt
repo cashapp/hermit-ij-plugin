@@ -14,7 +14,7 @@ class HermitJdkUpdater : HermitPropertyHandler {
                ApplicationManager.getApplication()?.runWriteAction {
                    hermitPackage.getSdk().setForProject(project)
                }
-               UI.showInfo(project, "Hermit", "Switching to SDK ${hermitPackage.name}:${hermitPackage.version}")
+               UI.showInfo(project, "Hermit", "Switching to SDK ${hermitPackage.displayName()}")
            }
        }
     }

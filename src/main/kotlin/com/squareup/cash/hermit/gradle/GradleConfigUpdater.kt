@@ -25,7 +25,7 @@ class GradleConfigUpdater : HermitPropertyHandler {
                     settings.distributionType = DistributionType.LOCAL
                 }
             }
-            UI.showInfo(project, "Hermit", "Switching to Gradle ${hermitPackage.name}:${hermitPackage.version}")
+            UI.showInfo(project, "Hermit", "Switching to Gradle ${hermitPackage.displayName()}")
         } else if (hermitPackage.type == PackageType.JDK) {
             // If the project uses a Hermit managed JDK, use the project JDK with Gradle
             // The project JDK is set accordingly in the HermitJdkUpdater

@@ -7,6 +7,7 @@ import arrow.core.computations.either
 import arrow.core.extensions.either.applicative.applicative
 import arrow.core.extensions.list.traverse.traverse
 import arrow.core.fix
+import arrow.core.getOrElse
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.projectRoots.Sdk
@@ -88,7 +89,8 @@ private fun hermitPackages(js: JsonElement): Result<List<HermitPackage>> {
                 val obj = elem.asObject().bind()
                 val ref = obj.field("Reference").flatMap { it.asObject() }.bind()
                 val name = ref.field("Name").flatMap { it.asPrimitive() }.map { it.nullableString() }.bind()
-                val version = ref.field("Version").flatMap { it.asPrimitive() }.map { it.nullableString() }.bind()
+                val version = ref.field("Version").flatMap { it.asPrimitive() }.map { it.nullableString() }.getOrElse { "" }
+                val channel = ref.field("Channel").flatMap { it.asPrimitive() }.map { it.nullableString() }.getOrElse { "" }
                 val root = obj.field("Root").flatMap { it.asPrimitive() }.map { it.nullableString() }.bind()
                 val type = when(name) {
                     "go" -> PackageType.Go
@@ -97,7 +99,7 @@ private fun hermitPackages(js: JsonElement): Result<List<HermitPackage>> {
                     "gradle" -> PackageType.Gradle
                     else -> PackageType.Unknown
                 }
-                HermitPackage(name, version, root, type)
+                HermitPackage(name, version, root, type, channel)
             }}
         }.fix().map { it.fix() }
     }

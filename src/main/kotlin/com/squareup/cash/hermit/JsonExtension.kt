@@ -36,7 +36,7 @@ fun JsonObject.field(name: String): Result<JsonElement> {
 
 fun JsonPrimitive.nullableString(): String {
     return if (this.contentOrNull == null) {
-        "<null>"
+        ""
     } else {
         this.content
     }
