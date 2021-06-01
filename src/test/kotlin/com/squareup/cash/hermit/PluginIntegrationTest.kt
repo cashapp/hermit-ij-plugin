@@ -2,6 +2,7 @@ package com.squareup.cash.hermit
 
 import com.goide.sdk.GoSdkService
 import com.google.common.collect.ImmutableMap
+import com.google.common.util.concurrent.ClosingFuture
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.application.runWriteActionAndWait
@@ -25,6 +26,8 @@ class PluginIntegrationTest : HermitProjectTestCase() {
     fun `test it reads the env variables correctly`() {
         withHermit(FakeHermit(listOf(TestPackage("name", "version", "root", mapOf(Pair("FOO", "BAR"))))))
         Hermit(project).enable()
+        waitAppThreads()
+
         TestCase.assertEquals(ImmutableMap.of("FOO", "BAR"), Hermit(project).environment().variables())
     }
 
@@ -32,6 +35,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         withHermit(FakeHermit(emptyList()))
         Hermit(project).enable()
         withHermit(FakeHermit(listOf(TestPackage("name", "version", "root", mapOf(Pair("FOO", "BARBAR"))))))
+        waitAppThreads()
 
         TestCase.assertEquals(ImmutableMap.of("FOO", "BARBAR"), Hermit(project).environment().variables())
     }
@@ -40,14 +44,17 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         Hermit(project).open()
         withHermit(FakeHermit(listOf(TestPackage("name", "version", "root", mapOf(Pair("FOO", "BAR"))))))
         Hermit(project).enable()
+        waitAppThreads()
+
         TestCase.assertEquals(ImmutableMap.of("FOO", "BAR"), Hermit(project).environment().variables())
     }
 
     fun `test it sets the JDK home correctly`() {
         withHermit(FakeHermit(listOf(TestPackage("openjdk", "1.0", "/root", emptyMap()))))
         Hermit(project).enable()
-        val sdk = ProjectRootManager.getInstance(project).projectSdk!!
+        waitAppThreads()
 
+        val sdk = ProjectRootManager.getInstance(project).projectSdk!!
         TestCase.assertEquals("/root", sdk.homePath)
 
         ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk) }
@@ -56,6 +63,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
     fun `test it sets the GoSDK home correctly`() {
         withHermit(FakeHermit(listOf(TestPackage("go", "1.0", "/root", emptyMap()))))
         Hermit(project).enable()
+        waitAppThreads()
 
         TestCase.assertEquals("file:///root", GoSdkService.getInstance(project).getSdk(null).homeUrl)
     }
@@ -63,6 +71,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
     fun `test it sets the Gradle home correctly`() {
         withHermit(FakeHermit(listOf(TestPackage("gradle", "1.0", "/root", emptyMap()))))
         Hermit(project).enable()
+        waitAppThreads()
 
         TestCase.assertEquals("/root", GradleUtils.findGradleProjectSettings(project)?.gradleHome)
     }
@@ -73,6 +82,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
             TestPackage("openjdk", "1.0", "/root", emptyMap())
         )))
         Hermit(project).enable()
+        waitAppThreads()
 
         TestCase.assertEquals("/root", GradleUtils.findGradleProjectSettings(project)?.gradleHome)
         TestCase.assertEquals(ExternalSystemJdkUtil.USE_PROJECT_JDK, GradleUtils.findGradleProjectSettings(project)?.gradleJvm)
