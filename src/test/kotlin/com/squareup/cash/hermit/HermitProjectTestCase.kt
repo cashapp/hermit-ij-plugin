@@ -28,4 +28,8 @@ abstract class HermitProjectTestCase : JavaProjectTestCase() {
 
         updateVFS()
     }
+
+    protected fun waitAppThreads() {
+        waitForAppLeakingThreads(1000, TimeUnit.MILLISECONDS)
+    }
 }
