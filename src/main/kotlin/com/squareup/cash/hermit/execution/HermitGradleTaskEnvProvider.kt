@@ -37,6 +37,10 @@ class HermitGradleTaskEnvProvider : GradleExecutionEnvironmentProvider {
         settings.externalSystemIdString = GradleConstants.SYSTEM_ID.id
         settings.externalProjectPath = taskSettings.externalProjectPath
         settings.taskNames = taskSettings.taskNames
+        settings.executionName = taskSettings.executionName
+        settings.taskDescriptions = taskSettings.taskDescriptions
+        settings.vmOptions = taskSettings.vmOptions
+        settings.scriptParameters = taskSettings.scriptParameters
 
         return ExternalSystemUtil.createExecutionEnvironment(profile.project, GradleConstants.SYSTEM_ID, settings, executor.id)
     }

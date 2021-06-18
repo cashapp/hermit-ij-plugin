@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Init Hermit
         run: |
-          ./bin/hermit env >> $GITHUB_ENV
+          ./bin/hermit env -r >> $GITHUB_ENV
           ./bin/hermit install -d
       - name: Test
         run: |
