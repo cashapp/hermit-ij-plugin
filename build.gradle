@@ -3,7 +3,7 @@ import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 plugins {
     id "idea"
     id "java"
-    id 'org.jetbrains.intellij' version '0.6.5'
+    id 'org.jetbrains.intellij' version '1.1.4'
     id 'org.jetbrains.kotlin.jvm' version '1.4.32'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.32'
 }
@@ -13,10 +13,10 @@ ext {
 }
 
 // The latest supported versions
-def IJ_VERSION = '211.7142.45'
-def GO_PLUGIN_VERSION = '211.7142.36'
+def IJ_VERSION = '212.4746.92'
+def GO_PLUGIN_VERSION = '212.4746.92'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
-def GOLAND_VERSION = '211.7142.13'
+def GOLAND_VERSION = '211.7442.57'
 // Test that the plugin still works on old releases
 def IJ_FROM_VERSION = '203.6682.168'
 def GOLAND_FROM_VERSION = '203.6682.164'
@@ -48,9 +48,9 @@ dependencies {
 intellij {
     // Note: The IntelliJ version below needs to match the go plugin version as defined here:
     // https://plugins.jetbrains.com/plugin/9568-go/versions
-    version IJ_VERSION
+    version = IJ_VERSION
     type = 'IU'
-    plugins "gradle", "java", "terminal", "org.jetbrains.plugins.go:" + GO_PLUGIN_VERSION
+    plugins = ["gradle", "java", "terminal", "org.jetbrains.plugins.go:" + GO_PLUGIN_VERSION]
 }
 
 runIde {
@@ -59,13 +59,13 @@ runIde {
 }
 
 patchPluginXml {
-    sinceBuild '203.5981.41'
+    sinceBuild = '203.5981.41'
     version = System.getenv("IJ_PLUGIN_VERSION")
 }
 
 runPluginVerifier {
     // These need to match the versions from
-    // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=DG,PS,DL,MPS,MPSIIP,RDCPPP,WS,AC,IIC,IIE,GO,CL,PCD,PCC,RD,PCE,IIU,RM,PCP
+    // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
     ideVersions = ['IIC-' + IJ_FROM_VERSION, 'GO-' + GOLAND_FROM_VERSION, 'IIC-'+ IJ_VERSION, 'GO-' + GOLAND_VERSION]
     failureLevel = EnumSet.complementOf(
             EnumSet.of(
