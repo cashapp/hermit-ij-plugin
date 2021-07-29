@@ -31,7 +31,7 @@ class HermitGradleAppEnvProvider : GradleExecutionEnvironmentProvider {
 
         if (environment?.runProfile is GradleRunConfiguration) {
             val config = environment.runProfile as GradleRunConfiguration
-            config.settings.env = Hermit(project).environment().variables()
+            config.settings.env = Hermit(project).environment().patch(config.settings.env)
         }
         return environment
     }
