@@ -1,12 +1,12 @@
 package com.squareup.cash.hermit
 
-import com.intellij.testFramework.JavaProjectTestCase
+import com.intellij.testFramework.HeavyPlatformTestCase
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermissions
 import java.util.concurrent.TimeUnit
 
-abstract class HermitProjectTestCase : JavaProjectTestCase() {
+abstract class HermitProjectTestCase : HeavyPlatformTestCase() {
     protected var hermitScriptPath: Path? = null
 
     protected fun updateVFS() {
