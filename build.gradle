@@ -49,7 +49,7 @@ intellij {
     // Note: The IntelliJ version below needs to match the go plugin version as defined here:
     // https://plugins.jetbrains.com/plugin/9568-go/versions
     version = IJ_VERSION
-    type = 'IU'
+    type = 'CE'
     plugins = ["gradle", "java", "terminal", "org.jetbrains.plugins.go:" + GO_PLUGIN_VERSION]
 }
 
