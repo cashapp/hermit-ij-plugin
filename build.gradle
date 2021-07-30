@@ -13,13 +13,13 @@ ext {
 }
 
 // The latest supported versions
-def IJ_VERSION = '212.4746.92'
+def IJ_VERSION = '2021.2'
 def GO_PLUGIN_VERSION = '212.4746.92'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
-def GOLAND_VERSION = '212.4746.93'
+def GOLAND_VERSION = '2021.2'
 // Test that the plugin still works on old releases
-def IJ_FROM_VERSION = '203.6682.168'
-def GOLAND_FROM_VERSION = '203.6682.164'
+def IJ_FROM_VERSION = '2020.3'
+def GOLAND_FROM_VERSION = '2020.3'
 
 group 'com.squareup.cash.hermit'
 version project.getProperties().getOrDefault("version", '1.0-SNAPSHOT')
@@ -66,7 +66,6 @@ patchPluginXml {
 runPluginVerifier {
     // These need to match the versions from
     // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
-    // TODO: GoLand crashes the verifier plugin
     ideVersions = ['IIC-' + IJ_FROM_VERSION, 'IIC-'+ IJ_VERSION, 'GO-' + GOLAND_FROM_VERSION, 'GO-' + GOLAND_VERSION]
     failureLevel = EnumSet.complementOf(
             EnumSet.of(
