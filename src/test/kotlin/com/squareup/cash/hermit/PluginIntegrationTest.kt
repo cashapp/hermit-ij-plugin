@@ -65,7 +65,9 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         Hermit(project).enable()
         waitAppThreads()
 
-        TestCase.assertEquals("file:///root", project.getService(GoSdkService::class.java).getSdk(null).homeUrl)
+        ApplicationManager.getApplication()?.runWriteAction {
+            TestCase.assertEquals("file:///root", project.getService(GoSdkService::class.java).getSdk(null).homeUrl)
+        }
     }
 
     fun `test it sets the Gradle home correctly`() {
