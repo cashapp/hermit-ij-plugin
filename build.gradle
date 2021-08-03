@@ -12,14 +12,14 @@ ext {
     kotlin_version = '1.4.32'
 }
 
-// The latest supported versions
-def IJ_VERSION = '212.4746.92'
-def GO_PLUGIN_VERSION = '212.4746.92'
+// The latest supported versions. Note, these are updated automatically from update-major-versions.sh
+def IIC_VERSION = '212.4746.92'
+def GO_VERSION = '211.7442.57'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
-def GOLAND_VERSION = '212.4746.93'
+def GO_PLUGIN_VERSION = IIC_VERSION
 // Test that the plugin still works on old releases
-def IJ_FROM_VERSION = '203.6682.168'
-def GOLAND_FROM_VERSION = '203.6682.164'
+def IIC_FROM_VERSION = '203.6682.168'
+def GO_FROM_VERSION = '203.6682.164'
 
 group 'com.squareup.cash.hermit'
 version project.getProperties().getOrDefault("version", '1.0-SNAPSHOT')
@@ -48,7 +48,7 @@ dependencies {
 intellij {
     // Note: The IntelliJ version below needs to match the go plugin version as defined here:
     // https://plugins.jetbrains.com/plugin/9568-go/versions
-    version = IJ_VERSION
+    version = IIC_VERSION
     type = 'IU'
     plugins = ["gradle", "java", "terminal", "org.jetbrains.plugins.go:" + GO_PLUGIN_VERSION]
 }
@@ -66,7 +66,7 @@ patchPluginXml {
 runPluginVerifier {
     // These need to match the versions from
     // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
-    ideVersions = ['IIC-' + IJ_FROM_VERSION, 'IIC-'+ IJ_VERSION, 'GO-' + GOLAND_FROM_VERSION, 'GO-' + GOLAND_VERSION]
+    ideVersions = ['IIC-' + IIC_FROM_VERSION, 'GO-' + GO_FROM_VERSION, 'IIC-'+ IIC_VERSION, 'GO-' + GO_VERSION]
     failureLevel = EnumSet.complementOf(
             EnumSet.of(
                     // skipping missing dependencies as com.intellij.java provided bi IJ raises a false warning
