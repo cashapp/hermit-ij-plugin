@@ -12,9 +12,9 @@ ext {
     kotlin_version = '1.4.32'
 }
 
-// The latest supported versions
-def IJ_VERSION = '212.4746.92'
-def GO_PLUGIN_VERSION = '212.4746.92'
+// The latest supported versions. Note, these are updated automatically from update-major-versions.sh
+def IIC_VERSION = '212.4746.92'
+def GO_VERSION = '212.4746.93'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
 def GOLAND_VERSION = '212.4746.93'
 // Test that the plugin still works on old releases
