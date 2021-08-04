@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron:  '0 * * * *'
+    - cron:  '*/15 * * * *'
 name: Major version update
 jobs:
   upgrade:
