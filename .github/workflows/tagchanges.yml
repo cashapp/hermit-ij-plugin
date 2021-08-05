@@ -1,6 +1,6 @@
 on:
   schedule:
-    - cron:  '*/15 * * * *'
+    - cron:  '0 2 * * *'
 name: Update Version on Changes
 jobs:
   upgrade:
