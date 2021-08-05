@@ -22,15 +22,19 @@ jobs:
         run: |
           TAG=$(git describe --abbrev=0 --tags)
           if [ "$(git show-ref -s main)" == "$(git show-ref -s "$TAG")" ]; then
-            echo "::set-output name=CHANGED::$(echo false)"
+            VERSION="${TAG#v}"
+            echo "::set-output name=VERSION::$(echo "$VERSION")"
           else
-            echo "::set-output name=CHANGED::$(echo true)"
+            echo "::set-output name=VERSION::$(echo '')"
           fi
       - name: Bump version and push tag
-        if: steps.check-changes.outputs.changed == 'true'
-        uses: anothrNick/github-tag-action@1.26.0
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-          WITH_V: true
-          DEFAULT_BUMP: patch
-          RELEASE_BRANCHES: main
+        if: steps.check-changes.outputs.version != ''
+        uses: actions-ecosystem/action-bump-semver@v1
+        id: bump-semver
+        with:
+          current_version: ${{ steps.check-changes.outputs.version }}
+          level: patch
+      - uses: actions-ecosystem/action-push-tag@v1
+        with:
+          github_token: ${{ steps.generate-token.outputs.token }}
+          tag: 'v${{ steps.bump-semver.outputs.new_version }}'
