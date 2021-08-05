@@ -1,0 +1,33 @@
+on:
+  schedule:
+    - cron:  '*/15 * * * *'
+name: Update Version on Changes
+jobs:
+  upgrade:
+    name: Check for updates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Generate Token
+        uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Check for changes
+        id: check-changes
+        run: |
+          TAG=$(git describe --abbrev=0 --tags)
+          if [ "$(git show-ref -s main)" == "$(git show-ref -s "$TAG")" ]; then
+            echo "::set-output name=CHANGED::$(echo false)"
+          else
+            echo "::set-output name=CHANGED::$(echo true)"
+          fi
+      - name: Bump version and push tag
+        if: ${{ steps.check-changes.outputs.changed == "true" }}
+        uses: anothrNick/github-tag-action@1.26.0
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
