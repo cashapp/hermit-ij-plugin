@@ -25,7 +25,7 @@ jobs:
             echo "::set-output name=CHANGED::$(echo true)"
           fi
       - name: Bump version and push tag
-        if: ${{ steps.check-changes.outputs.changed == "true" }}
+        if: steps.check-changes.outputs.changed == 'true'
         uses: anothrNick/github-tag-action@1.26.0
         env:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
