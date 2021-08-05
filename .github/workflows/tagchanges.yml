@@ -33,3 +33,4 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           WITH_V: true
           DEFAULT_BUMP: patch
+          RELEASE_BRANCHES: main
