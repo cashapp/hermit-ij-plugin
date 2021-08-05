@@ -23,9 +23,9 @@ jobs:
           TAG=$(git describe --abbrev=0 --tags)
           if [ "$(git show-ref -s main)" == "$(git show-ref -s "$TAG")" ]; then
             VERSION="${TAG#v}"
-            echo "::set-output name=VERSION::$(echo "$VERSION")"
+            echo "::set-output name=version::$(echo "$VERSION")"
           else
-            echo "::set-output name=VERSION::$(echo '')"
+            echo "::set-output name=version::$(echo '')"
           fi
       - name: Bump version and push tag
         if: steps.check-changes.outputs.version != ''
@@ -34,7 +34,10 @@ jobs:
         with:
           current_version: ${{ steps.check-changes.outputs.version }}
           level: patch
-      - uses: actions-ecosystem/action-push-tag@v1
+      - uses: mathieudutour/github-tag-action@v5.6
+        if: steps.check-changes.outputs.version != ''
         with:
           github_token: ${{ steps.generate-token.outputs.token }}
-          tag: 'v${{ steps.bump-semver.outputs.new_version }}'
+          custom_tag: 'v${{ steps.bump-semver.outputs.new_version }}'
+          release_branches: 'main'
+
