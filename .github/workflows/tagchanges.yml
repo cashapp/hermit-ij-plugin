@@ -21,7 +21,7 @@ jobs:
         id: check-changes
         run: |
           TAG=$(git describe --abbrev=0 --tags)
-          if [ "$(ggit rev-list -n 1 main)" == "$(git rev-list -n 1 $TAG)" ]; then
+          if [ "$(git rev-list -n 1 main)" == "$(git rev-list -n 1 $TAG)" ]; then
             echo "::set-output name=version::$(echo '')"
           else
             VERSION="${TAG#v}"
