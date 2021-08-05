@@ -22,10 +22,10 @@ jobs:
         run: |
           TAG=$(git describe --abbrev=0 --tags)
           if [ "$(git show-ref -s main)" == "$(git show-ref -s "$TAG")" ]; then
+            echo "::set-output name=version::$(echo '')"
+          else
             VERSION="${TAG#v}"
             echo "::set-output name=version::$(echo "$VERSION")"
-          else
-            echo "::set-output name=version::$(echo '')"
           fi
       - name: Bump version and push tag
         if: steps.check-changes.outputs.version != ''
