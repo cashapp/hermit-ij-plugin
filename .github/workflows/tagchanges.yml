@@ -38,6 +38,6 @@ jobs:
         if: steps.check-changes.outputs.version != ''
         with:
           github_token: ${{ steps.generate-token.outputs.token }}
-          custom_tag: 'v${{ steps.bump-semver.outputs.new_version }}'
+          custom_tag: '${{ steps.bump-semver.outputs.new_version }}'
           release_branches: 'main'
 
