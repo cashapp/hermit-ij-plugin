@@ -9,7 +9,11 @@ import com.intellij.openapi.application.runWriteActionAndWait
 import com.intellij.openapi.externalSystem.service.execution.ExternalSystemJdkUtil
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.roots.ProjectRootManager
+import com.intellij.openapi.wm.WindowManager
+import com.intellij.util.castSafelyTo
 import com.squareup.cash.hermit.gradle.GradleUtils
+import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarPresentation
+import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidget
 import junit.framework.TestCase
 
 class PluginIntegrationTest : HermitProjectTestCase() {
@@ -115,5 +119,34 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         TestCase.assertEquals("Hermit (openjdk-1.0)", sdk.name)
 
         ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk) }
+    }
+
+    fun `test it shows the Hermit status as enabled if Hermit is enabled for the project`() {
+        withHermit(FakeHermit(emptyList()))
+        Hermit(project).open()
+        Hermit(project).enable()
+        waitAppThreads()
+
+        val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
+        val presentation = widget.presentation as HermitStatusBarPresentation
+        TestCase.assertEquals(presentation.text, "Hermit enabled")
+    }
+
+    fun `test it shows the Hermit status as disabled if Hermit is not enabled for the project`() {
+        withHermit(FakeHermit(emptyList()))
+        Hermit(project).open()
+        waitAppThreads()
+
+        val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
+        val presentation = widget.presentation as HermitStatusBarPresentation
+        TestCase.assertEquals(presentation.text, "Hermit disabled")
+    }
+
+    fun `test it does not shows the Hermit status if there is no Hermit in the project`() {
+        Hermit(project).open()
+        waitAppThreads()
+
+        val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)
+        TestCase.assertNull(widget)
     }
 }

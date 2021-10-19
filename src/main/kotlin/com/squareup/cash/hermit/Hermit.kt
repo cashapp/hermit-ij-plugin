@@ -3,11 +3,15 @@ package com.squareup.cash.hermit
 import com.google.common.collect.ImmutableMap
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.WindowManager
+import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
 import com.squareup.cash.hermit.action.BackgroundableWrapper
+import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidget
+import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidgetFactory
 import java.util.concurrent.ConcurrentHashMap
-import com.intellij.openapi.extensions.ExtensionPointName
 
 
 /**
@@ -57,11 +61,13 @@ object Hermit {
                     }
                 }
             }
+            this.refreshUI()
         }
 
         fun enable() {
             PropertiesComponent.getInstance(project).setValue(PropertyID.HermitEnabled, true)
             this.isHermitEnabled = true
+            this.refreshUI()
             this.installAndUpdate()
         }
 
@@ -81,6 +87,15 @@ object Hermit {
                     }
                 })
                 ProgressManager.getInstance().run(task)
+            }
+        }
+
+        private fun refreshUI() {
+            val statusBarWidgetsManager = project.getService(StatusBarWidgetsManager::class.java)
+            ApplicationManager.getApplication().invokeLater {
+                statusBarWidgetsManager.updateWidget(HermitStatusBarWidgetFactory::class.java)
+
+                WindowManager.getInstance().getStatusBar(project)?.updateWidget(HermitStatusBarWidget.ID)
             }
         }
 
@@ -108,6 +123,10 @@ object Hermit {
 
         fun hasHermit(): Boolean {
             return this.isHermitProject
+        }
+
+        fun isHermitEnabled(): Boolean {
+            return hasHermit() && this.isHermitEnabled
         }
 
         fun binDir(): String {
