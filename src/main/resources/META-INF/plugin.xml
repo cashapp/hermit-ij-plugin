@@ -29,11 +29,11 @@
     <actions>
         <action id="org.squareup.cash.hermit.enable"
                 class="com.squareup.cash.hermit.action.EnableHermitAction"
-                text="Yes" description="Enable Hermit for the Project">
+                text="Enable Hermit" description="Enable Hermit for the Project">
         </action>
         <action id="org.squareup.cash.hermit.dont-enable"
                 class="com.squareup.cash.hermit.action.DontEnableHermitAction"
-                text="No" description="Don't enable Hermit for the Project">
+                text="Don't Enable Hermit" description="Don't enable Hermit for the Project">
         </action>
     </actions>
 
