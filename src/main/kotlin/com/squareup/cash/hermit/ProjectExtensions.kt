@@ -8,6 +8,7 @@ import arrow.core.extensions.either.applicative.applicative
 import arrow.core.extensions.list.traverse.traverse
 import arrow.core.fix
 import arrow.core.getOrElse
+import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.projectRoots.Sdk
@@ -41,12 +42,12 @@ fun Project.hermitProperties(): Result<HermitProperties> {
         return success(HermitProperties(emptyMap(), emptyList()))
     }
     return runBlocking<Result<HermitProperties>> { either {
-        val packages = runHermit("list -s")
+        val packages = runHermit("list", "-s")
             .map { it.stdout().readLines() }
             .flatMap { packagesFor(it) }
             .bind()
 
-        val env = runHermit("env -r")
+        val env = runHermit("env", "-r")
             .map { it.stdout().readLines() }
             .map { environmentFrom(it) }
             .bind()
@@ -73,8 +74,7 @@ private fun environmentFrom(lines: List<String>): HashMap<String, String> {
 
 private fun Project.packagesFor(refs: List<String>): Result<List<HermitPackage>> {
     return if ( refs.nonEmpty() ) {
-        val args = refs.reduce { l, r -> "$l $r" }
-        runHermit("info --json $args")
+        runHermit("info", "--json", *refs.toTypedArray())
             .map { it.stdout().readText() }
             .flatMap { hermitPackages(Json.parseToJsonElement(it)) }
     } else {
@@ -109,14 +109,16 @@ private fun Process.stdout(): BufferedReader {
     return  this.inputStream.bufferedReader()
 }
 
-private fun Project.runHermit(args: String): Result<Process> {
+private fun Project.runHermit(vararg args: String): Result<Process> {
     if ( !this.hasHermit() ) {
         return failure("No Hermit found in the project")
     }
 
-    val cmd = "./hermit $args"
+    val cmd = "hermit"
     val binDir = this.binDir()?.toNioPath()?.toFile()
-    val process = Runtime.getRuntime().exec(cmd, null, binDir)
+    val commandLine = GeneralCommandLine(cmd, *args)
+    commandLine.workDirectory = binDir
+    val process = commandLine.createProcess()
     val exitCode = try {
         process.waitFor()
     } catch (e: Exception) {
