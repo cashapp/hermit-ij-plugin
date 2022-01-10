@@ -15,19 +15,20 @@ import com.squareup.cash.hermit.gradle.GradleUtils
 import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarPresentation
 import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidget
 import junit.framework.TestCase
+import org.junit.Test
 
 class PluginIntegrationTest : HermitProjectTestCase() {
-    fun `test it negatively detects hermit correctly`() {
+    @Test fun `test it negatively detects hermit correctly`() {
         TestCase.assertFalse(project.hasHermit())
     }
 
-    fun `test it positively detects hermit correctly`() {
+    @Test fun `test it positively detects hermit correctly`() {
         withHermit(FakeHermit(emptyList()))
         Hermit(project).enable()
         TestCase.assertTrue(project.hasHermit())
     }
 
-    fun `test it reads the env variables correctly`() {
+    @Test fun `test it reads the env variables correctly`() {
         withHermit(FakeHermit(listOf(TestPackage("name", "version", "", "root", mapOf(Pair("FOO", "BAR"))))))
         Hermit(project).enable()
         waitAppThreads()
@@ -35,7 +36,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         TestCase.assertEquals(ImmutableMap.of("FOO", "BAR"), Hermit(project).environment().variables())
     }
 
-    fun `test it reloads the configuration when it changes`() {
+    @Test fun `test it reloads the configuration when it changes`() {
         withHermit(FakeHermit(emptyList()))
         Hermit(project).enable()
         withHermit(FakeHermit(listOf(TestPackage("name", "version", "", "root", mapOf(Pair("FOO", "BARBAR"))))))
@@ -44,7 +45,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         TestCase.assertEquals(ImmutableMap.of("FOO", "BARBAR"), Hermit(project).environment().variables())
     }
 
-    fun `test it works if hermit is initialised after opening`() {
+    @Test fun `test it works if hermit is initialised after opening`() {
         Hermit(project).open()
         withHermit(FakeHermit(listOf(TestPackage("name", "version", "", "root", mapOf(Pair("FOO", "BAR"))))))
         Hermit(project).enable()
@@ -53,7 +54,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         TestCase.assertEquals(ImmutableMap.of("FOO", "BAR"), Hermit(project).environment().variables())
     }
 
-    fun `test it sets the JDK home correctly`() {
+    @Test fun `test it sets the JDK home correctly`() {
         withHermit(FakeHermit(listOf(TestPackage("openjdk", "1.0", "", "/root", emptyMap()))))
         Hermit(project).enable()
         waitAppThreads()
@@ -64,7 +65,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk) }
     }
 
-    fun `test it sets the GoSDK home correctly`() {
+    @Test fun `test it sets the GoSDK home correctly`() {
         withHermit(FakeHermit(listOf(TestPackage("go", "1.0", "","/root", emptyMap()))))
         Hermit(project).enable()
         waitAppThreads()
@@ -72,7 +73,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         TestCase.assertEquals("file:///root", GoSdkService.getInstance(project).getSdk(null).homeUrl)
     }
 
-    fun `test it sets the Gradle home correctly`() {
+    @Test fun `test it sets the Gradle home correctly`() {
         withHermit(FakeHermit(listOf(TestPackage("gradle", "1.0", "","/root", emptyMap()))))
         Hermit(project).enable()
         waitAppThreads()
@@ -80,7 +81,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         TestCase.assertEquals("/root", GradleUtils.findGradleProjectSettings(project)?.gradleHome)
     }
 
-    fun `test it sets the Gradle JDK home correctly, if both JDK and Gradle are present`() {
+    @Test fun `test it sets the Gradle JDK home correctly, if both JDK and Gradle are present`() {
         withHermit(FakeHermit(listOf(
             TestPackage("gradle", "1.0", "","/root", emptyMap()),
             TestPackage("openjdk", "1.0", "","/root", emptyMap())
@@ -95,7 +96,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk) }
     }
 
-    fun `test it formats channel based JDK names correctly`() {
+    @Test fun `test it formats channel based JDK names correctly`() {
         withHermit(FakeHermit(listOf(
             TestPackage("openjdk", "", "test","/root", emptyMap())
         )))
@@ -108,7 +109,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk) }
     }
 
-    fun `test it formats version based JDK names correctly`() {
+    @Test fun `test it formats version based JDK names correctly`() {
         withHermit(FakeHermit(listOf(
             TestPackage("openjdk", "1.0", "","/root", emptyMap())
         )))
@@ -121,7 +122,32 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk) }
     }
 
-    fun `test it shows the Hermit status as enabled if Hermit is enabled for the project`() {
+    @Test fun `test it shows the Hermit status as enabled if Hermit is enabled for the project`() {
+        withHermit(FakeHermit(listOf(
+            TestPackage("foo", "1.0", "","/root", emptyMap())
+        )))
+        Hermit(project).open()
+        Hermit(project).enable()
+        waitAppThreads()
+
+        val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
+        val presentation = widget.presentation as HermitStatusBarPresentation
+        TestCase.assertEquals("Hermit enabled", presentation.text)
+    }
+
+    @Test fun `test it shows the Hermit status as disabled if Hermit is not enabled for the project`() {
+        withHermit(FakeHermit(listOf(
+            TestPackage("foo", "1.0", "","/root", emptyMap())
+        )))
+        Hermit(project).open()
+        waitAppThreads()
+
+        val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
+        val presentation = widget.presentation as HermitStatusBarPresentation
+        TestCase.assertEquals("Hermit disabled", presentation.text)
+    }
+
+    @Test fun `test it shows the Hermit status as failed if Hermit execution fails when opening the project`() {
         withHermit(FakeHermit(emptyList()))
         Hermit(project).open()
         Hermit(project).enable()
@@ -129,20 +155,10 @@ class PluginIntegrationTest : HermitProjectTestCase() {
 
         val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
         val presentation = widget.presentation as HermitStatusBarPresentation
-        TestCase.assertEquals(presentation.text, "Hermit enabled")
+        TestCase.assertEquals("Hermit failed", presentation.text)
     }
 
-    fun `test it shows the Hermit status as disabled if Hermit is not enabled for the project`() {
-        withHermit(FakeHermit(emptyList()))
-        Hermit(project).open()
-        waitAppThreads()
-
-        val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
-        val presentation = widget.presentation as HermitStatusBarPresentation
-        TestCase.assertEquals(presentation.text, "Hermit disabled")
-    }
-
-    fun `test it does not shows the Hermit status if there is no Hermit in the project`() {
+    @Test fun `test it does not shows the Hermit status if there is no Hermit in the project`() {
         Hermit(project).open()
         waitAppThreads()
 

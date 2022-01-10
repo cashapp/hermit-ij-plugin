@@ -18,6 +18,12 @@ import java.util.concurrent.ConcurrentHashMap
  * HermitState maintains the information about the hermit environment of each active project
  */
 object Hermit {
+    enum class HermitStatus {
+        Disabled,
+        Enabled,
+        Failed
+    }
+
     private val HANDLER_EP_NAME: ExtensionPointName<HermitPropertyHandler> =
         ExtensionPointName.create<HermitPropertyHandler>("org.squareup.cash.hermit.idea-plugin.property-handler")
 
@@ -39,55 +45,65 @@ object Hermit {
     class State(private val project: Project) {
         // Is this project a hermit enabled project?
         private var isHermitProject = false
-        // Has the user agreed to enable the Hermit environment
-        private var isHermitEnabled = false
         // Has the project been opened in the plugin?
         private var isHermitOpened = false
+        // Current status of the Hermit integration
+        private var status = HermitStatus.Disabled
 
         private var properties: HermitProperties? = null
 
         fun open() {
             val props = PropertiesComponent.getInstance(project)
-            this.isHermitEnabled = props.getBoolean(PropertyID.HermitEnabled, false)
+            val hermitEnabled = props.getBoolean(PropertyID.HermitEnabled, false)
             this.isHermitProject = project.hasHermit()
 
-            if (this.isHermitProject) {
-                if (!this.isHermitOpened) {
-                    this.isHermitOpened = true
-                    if (this.isHermitEnabled) {
-                        this.installAndUpdate()
-                    } else {
-                        UI.askToEnableHermit(project)
-                    }
+            if (this.isHermitProject && !this.isHermitOpened) {
+                this.isHermitOpened = true
+                if (hermitEnabled) {
+                    this.runInstall()
+                } else {
+                    setStatus(HermitStatus.Disabled)
+                    UI.askToEnableHermit(project)
                 }
+            } else if (!this.isHermitProject) {
+                setStatus(HermitStatus.Disabled)
             }
             this.refreshUI()
         }
 
         fun enable() {
             PropertiesComponent.getInstance(project).setValue(PropertyID.HermitEnabled, true)
-            this.isHermitEnabled = true
-            this.refreshUI()
-            this.installAndUpdate()
+            this.runInstall()
         }
 
         fun installAndUpdate() {
-            if (this.isHermitEnabled) {
-                val task = BackgroundableWrapper(project, "Installing Hermit Packages", Runnable {
-                    when (val result = project.installHermitPackages()) {
-                        is Failure -> {
-                            UI.showError(project, result.a)
-                        }
-                        is Success -> {
-                            // We need to enable hermit in a Write enabled thread
-                            ApplicationManager.getApplication().invokeLater {
-                                Hermit(project).update()
-                            }
+            if (this.status != HermitStatus.Disabled) {
+                runInstall()
+            }
+        }
+
+        private fun runInstall() {
+            val task = BackgroundableWrapper(project, "Installing Hermit Packages", Runnable {
+                when (val result = project.installHermitPackages()) {
+                    is Failure -> {
+                        UI.showError(project, result.a)
+                        setStatus(HermitStatus.Failed)
+                    }
+                    is Success -> {
+                        // We need to enable hermit in a Write enabled thread
+                        ApplicationManager.getApplication().invokeLater {
+                            setStatus(HermitStatus.Enabled)
+                            Hermit(project).update()
                         }
                     }
-                })
-                ProgressManager.getInstance().run(task)
-            }
+                }
+            })
+            ProgressManager.getInstance().run(task)
+        }
+
+        private fun setStatus(newStatus: HermitStatus) {
+            this.status = newStatus
+            this.refreshUI()
         }
 
         private fun refreshUI() {
@@ -103,11 +119,12 @@ object Hermit {
             this.clear()
             this.isHermitProject = project.hasHermit()
 
-            if (this.isHermitProject && this.isHermitEnabled) {
+            if (this.isHermitProject && this.status == HermitStatus.Enabled) {
                 when(val prop =  project.hermitProperties()) {
                     is Failure -> {
                         this.isHermitProject = false
                         UI.showError(project, prop.a)
+                        setStatus(HermitStatus.Failed)
                     }
                     is Success -> {
                         this.properties = prop.b
@@ -125,8 +142,8 @@ object Hermit {
             return this.isHermitProject
         }
 
-        fun isHermitEnabled(): Boolean {
-            return hasHermit() && this.isHermitEnabled
+        fun hermitStatus(): HermitStatus {
+            return this.status
         }
 
         fun binDir(): String {
