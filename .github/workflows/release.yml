@@ -16,7 +16,7 @@ jobs:
           ./bin/hermit install -d
       - name: Test
         run: |
-          ./bin/gradle test
+          ./bin/gradle test --info
       - name: Publish
         env:
           JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_PLUGIN_TOKEN }}
