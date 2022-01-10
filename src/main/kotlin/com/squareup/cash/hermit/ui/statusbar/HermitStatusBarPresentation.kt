@@ -1,5 +1,6 @@
 package com.squareup.cash.hermit.ui.statusbar
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.util.Consumer
@@ -14,17 +15,24 @@ class HermitStatusBarPresentation(val project: Project) : StatusBarWidget.TextPr
 
   override fun getClickConsumer(): Consumer<MouseEvent>? {
     return Consumer<MouseEvent> {
-      if ( Hermit(project).hasHermit() && !Hermit(project).isHermitEnabled() ) {
-        UI.askToEnableHermit(project)
+      if (Hermit(project).hasHermit()) {
+        val status = Hermit(project).hermitStatus()
+        if (status == Hermit.HermitStatus.Disabled) {
+          UI.askToEnableHermit(project)
+        } else if (status == Hermit.HermitStatus.Failed) {
+          ApplicationManager.getApplication().invokeLater {
+            Hermit(project).installAndUpdate()
+          }
+        }
       }
     }
   }
 
   override fun getText(): String {
-    return if ( Hermit(project).isHermitEnabled() ) {
-      "Hermit enabled"
-    } else {
-      "Hermit disabled"
+    return when (Hermit(project).hermitStatus()) {
+      Hermit.HermitStatus.Enabled -> "Hermit enabled"
+      Hermit.HermitStatus.Disabled -> "Hermit disabled"
+      Hermit.HermitStatus.Failed -> "Hermit failed"
     }
   }
 

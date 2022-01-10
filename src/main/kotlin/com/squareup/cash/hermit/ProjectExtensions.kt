@@ -114,7 +114,7 @@ private fun Project.runHermit(vararg args: String): Result<Process> {
         return failure("No Hermit found in the project")
     }
 
-    val cmd = "hermit"
+    val cmd = "./hermit"
     val binDir = this.binDir()?.toNioPath()?.toFile()
     val commandLine = GeneralCommandLine(cmd, *args)
     commandLine.workDirectory = binDir

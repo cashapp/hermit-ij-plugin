@@ -92,3 +92,7 @@ dependencies {
 tasks.buildSearchableOptions {
     enabled = false
 }
+
+tasks.test {
+    systemProperty("idea.force.use.core.classloader", "true")
+}
