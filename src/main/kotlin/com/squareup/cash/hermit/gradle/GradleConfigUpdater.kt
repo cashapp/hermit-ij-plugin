@@ -1,6 +1,7 @@
 package com.squareup.cash.hermit.gradle
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.externalSystem.service.execution.ExternalSystemJdkUtil
 import com.intellij.openapi.project.Project
 import com.squareup.cash.hermit.HermitPackage
@@ -11,16 +12,20 @@ import org.jetbrains.plugins.gradle.settings.DistributionType
 import org.jetbrains.plugins.gradle.settings.GradleProjectSettings
 
 class GradleConfigUpdater : HermitPropertyHandler {
+    private val log: Logger = Logger.getInstance(this.javaClass)
+
     override fun handle(hermitPackage: HermitPackage, project: Project) {
         if (hermitPackage.type == PackageType.Gradle) {
             val settings = GradleUtils.findGradleProjectSettings(project)
             ApplicationManager.getApplication()?.runWriteAction {
                 if (settings == null) {
+                    log.debug("creating new project (" + project.name + ")  gradle config for " + hermitPackage.logString())
                     val newSettings = GradleProjectSettings()
                     newSettings.gradleHome = hermitPackage.path
                     newSettings.distributionType = DistributionType.LOCAL
                     GradleUtils.insertNewProjectSettings(project, newSettings)
                 } else if (!isUpToDate(settings, hermitPackage)) {
+                    log.debug("updating project (" + project.name + ")  gradle config to " + hermitPackage.logString())
                     settings.gradleHome = hermitPackage.path
                     settings.distributionType = DistributionType.LOCAL
                 }
@@ -32,10 +37,12 @@ class GradleConfigUpdater : HermitPropertyHandler {
             val settings = GradleUtils.findGradleProjectSettings(project)
             ApplicationManager.getApplication()?.runWriteAction {
                 if (settings == null) {
+                    log.debug("creating project (" + project.name + ") gradle JDK config for " + hermitPackage.logString())
                     val newSettings = GradleProjectSettings()
                     newSettings.gradleJvm = ExternalSystemJdkUtil.USE_PROJECT_JDK
                     GradleUtils.insertNewProjectSettings(project, newSettings)
                 } else if (!isUpToDate(settings, hermitPackage)) {
+                    log.debug("updating project (" + project.name + ") gradle JDK config to " + hermitPackage.logString())
                     settings.gradleJvm = ExternalSystemJdkUtil.USE_PROJECT_JDK
                 }
             }

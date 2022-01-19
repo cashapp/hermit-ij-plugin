@@ -14,7 +14,7 @@ abstract class HermitProjectTestCase : JavaProjectTestCase() {
         waitForAppLeakingThreads(1000, TimeUnit.MILLISECONDS)
     }
 
-    protected fun withHermit(hermit: FakeHermit) {
+    protected fun withHermit(hermit: AbstractHermit) {
         val dir = projectDirOrFile.parent
         val bin = Files.createDirectories(dir.resolve("bin"))
         val permission = PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwxrwxrwx"))

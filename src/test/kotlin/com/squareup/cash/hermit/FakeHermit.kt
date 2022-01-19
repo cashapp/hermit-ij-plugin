@@ -1,16 +1,28 @@
 package com.squareup.cash.hermit
 
-import com.jetbrains.rd.util.string.printToString
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import java.nio.file.Files
 import java.nio.file.Path
 
+abstract class AbstractHermit {
+    abstract fun writeTo(path: Path)
+}
+
 data class TestPackage(val name: String, val version: String, val channel: String, val root: String, val env: Map<String, String>)
 
-data class FakeHermit(val packages: List<TestPackage>) {
-    fun writeTo(path: Path) {
+object BrokenHermit : AbstractHermit() {
+    override fun writeTo(path: Path) {
+        Files.writeString(path,
+            """#!/bin/bash
+              totally broken!
+            """.trimMargin())
+    }
+}
+
+data class FakeHermit(val packages: List<TestPackage>) : AbstractHermit() {
+    override fun writeTo(path: Path) {
         val packageList = packages
             .map { "echo \"${it.name}\"" }
             .joinToString("\n")
@@ -29,11 +41,11 @@ data class FakeHermit(val packages: List<TestPackage>) {
                 "Description" to JsonPrimitive("description")
             )) }).toString()
 
-        val listBlock = """
+        val listBlock = if (packageList.isNotEmpty()) """
             if [ ${'$'}1 == "list" ]; then
             $packageList
             fi
-        """.trimIndent()
+        """.trimIndent() else ""
 
         val envBlock = if (envList.isNotEmpty()) """
             if [ ${'$'}1 == "env" ]; then

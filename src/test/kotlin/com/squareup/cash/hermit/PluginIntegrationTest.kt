@@ -148,7 +148,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
     }
 
     @Test fun `test it shows the Hermit status as failed if Hermit execution fails when opening the project`() {
-        withHermit(FakeHermit(emptyList()))
+        withHermit(BrokenHermit)
         Hermit(project).open()
         Hermit(project).enable()
         waitAppThreads()
