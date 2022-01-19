@@ -39,7 +39,7 @@ object Hermit {
     }
 
     fun remove(project: Project) {
-        log.debug("closing project: " + project.name)
+        log.debug(project.name + ": closing project")
         project.projectFilePath?.let { projects.remove(it) }
     }
 
@@ -65,15 +65,15 @@ object Hermit {
                 log.debug("opening project " + project.name)
                 this.isHermitOpened = true
                 if (hermitEnabled) {
-                    log.debug("hermit enabled in the project")
+                    log.debug(project.name + ": hermit enabled in the project")
                     this.runInstall()
                 } else {
-                    log.debug("hermit disabled in the project")
+                    log.debug(project.name + ": hermit disabled in the project")
                     setStatus(HermitStatus.Disabled)
                     UI.askToEnableHermit(project)
                 }
             } else if (!this.isHermitProject) {
-                log.debug("no hermit detected for " + project.name)
+                log.debug(project.name + ": no hermit detected for " + project.name)
                 setStatus(HermitStatus.Disabled)
             }
             this.refreshUI()
@@ -95,12 +95,12 @@ object Hermit {
             val task = BackgroundableWrapper(project, "Installing Hermit Packages", Runnable {
                 when (val result = project.installHermitPackages()) {
                     is Failure -> {
-                        log.error("installing hermit packages failed: " + result.a)
+                        log.warn(project.name + ": installing hermit packages failed: " + result.a)
                         UI.showError(project, result.a)
                         setStatus(HermitStatus.Failed)
                     }
                     is Success -> {
-                        log.info("installing hermit packages succeeded")
+                        log.info(project.name + ": installing hermit packages succeeded")
                         // We need to enable hermit in a Write enabled thread
                         ApplicationManager.getApplication().invokeLater {
                             setStatus(HermitStatus.Enabled)
@@ -131,16 +131,16 @@ object Hermit {
             this.isHermitProject = project.hasHermit()
 
             if (this.isHermitProject && this.status == HermitStatus.Enabled) {
-                log.debug("updating hermit status from disk")
+                log.debug(project.name + ": updating hermit status from disk")
                 when(val prop =  project.hermitProperties()) {
                     is Failure -> {
-                        log.error("updating hermit status failed: " + prop.a)
+                        log.warn(project.name + ": updating hermit status failed: " + prop.a)
                         this.isHermitProject = false
                         UI.showError(project, prop.a)
                         setStatus(HermitStatus.Failed)
                     }
                     is Success -> {
-                        log.info("updating hermit status succeeded: " + prop.b.logString())
+                        log.info(project.name + ": updating hermit status succeeded: " + prop.b.logString())
                         this.properties = prop.b
                         prop.b.packages.forEach { updateHandlers(it) }
                     }
