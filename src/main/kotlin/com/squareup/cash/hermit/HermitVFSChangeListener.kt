@@ -1,5 +1,6 @@
 package com.squareup.cash.hermit
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectLocator
 import com.intellij.openapi.project.guessProjectDir
@@ -8,6 +9,8 @@ import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
 
 class HermitVFSChangeListener : BulkFileListener {
+    private val log: Logger = Logger.getInstance(this.javaClass)
+
     override fun after(events: MutableList<out VFileEvent>) {
         val needsUpdating = HashMap<String, Project>()
         events.forEach {
@@ -19,6 +22,7 @@ class HermitVFSChangeListener : BulkFileListener {
         }
 
         needsUpdating.forEach {
+            log.debug("hermit configuration change detected at " + it.value.name)
             Hermit(it.value).open()
             Hermit(it.value).installAndUpdate()
         }
