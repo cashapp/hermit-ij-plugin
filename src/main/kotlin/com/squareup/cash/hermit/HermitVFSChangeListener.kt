@@ -16,23 +16,31 @@ class HermitVFSChangeListener : BulkFileListener {
         events.forEach {
             val file = it.file
             val project = ProjectLocator.getInstance().guessProjectForFile(file)
-            if (project != null && file != null && isBinChange(project, file)) {
+            if (project != null && file != null && isHermitChange(project, file)) {
                 needsUpdating[project.name] = project
             }
         }
 
         needsUpdating.forEach {
-            log.debug("hermit configuration change detected at " + it.value.name)
+            log.info("hermit configuration change detected at " + it.value.name)
             Hermit(it.value).open()
             Hermit(it.value).installAndUpdate()
         }
     }
 
-    private fun isBinChange(project: Project, file: VirtualFile): Boolean {
+    private fun isHermitChange(project: Project, file: VirtualFile): Boolean {
         val root = project.guessProjectDir()
-        if (root == null || (file.parent == null && file.name != "bin") || (file.parent.name != "bin" && file.name != "bin")) {
+        // Check if we are in a bin/ directory
+        if (root == null || file.parent == null || file.parent.name != "bin") {
             return false
         }
-        return (file.parent.parent != null && file.parent.parent == root) || (file.name == "bin" && file.parent == root)
+        // Check if we are at root bin/ directory
+        if (file.parent.parent != null && file.parent.parent != root) {
+            return false
+        }
+        val isPackageChange = file.name.endsWith(".pkg") && file.name.startsWith(".")
+        val isHermitScriptChange = file.name == "hermit" || file.name == "hermit.hcl"
+
+        return isPackageChange || isHermitScriptChange
     }
 }

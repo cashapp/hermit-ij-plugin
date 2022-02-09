@@ -91,7 +91,7 @@ object Hermit {
         }
 
         private fun runInstall() {
-            log.debug("installing hermit packages")
+            log.info("installing hermit packages")
             val task = BackgroundableWrapper(project, "Installing Hermit Packages", Runnable {
                 when (val result = project.installHermitPackages()) {
                     is Failure -> {
