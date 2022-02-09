@@ -14,6 +14,10 @@ import org.jetbrains.plugins.gradle.settings.GradleProjectSettings
 class GradleConfigUpdater : HermitPropertyHandler {
     private val log: Logger = Logger.getInstance(this.javaClass)
 
+    private fun notifyGradleUpdate(project: Project, name: String) {
+        UI.showInfo(project, "Hermit", "Switching to Gradle ${name}")
+    }
+
     override fun handle(hermitPackage: HermitPackage, project: Project) {
         if (hermitPackage.type == PackageType.Gradle) {
             val settings = GradleUtils.findGradleProjectSettings(project)
@@ -24,13 +28,14 @@ class GradleConfigUpdater : HermitPropertyHandler {
                     newSettings.gradleHome = hermitPackage.path
                     newSettings.distributionType = DistributionType.LOCAL
                     GradleUtils.insertNewProjectSettings(project, newSettings)
+                    notifyGradleUpdate(project, hermitPackage.displayName())
                 } else if (!isUpToDate(settings, hermitPackage)) {
                     log.debug("updating project (" + project.name + ")  gradle config to " + hermitPackage.logString())
                     settings.gradleHome = hermitPackage.path
                     settings.distributionType = DistributionType.LOCAL
+                    notifyGradleUpdate(project, hermitPackage.displayName())
                 }
             }
-            UI.showInfo(project, "Hermit", "Switching to Gradle ${hermitPackage.displayName()}")
         } else if (hermitPackage.type == PackageType.JDK) {
             // If the project uses a Hermit managed JDK, use the project JDK with Gradle
             // The project JDK is set accordingly in the HermitJdkUpdater

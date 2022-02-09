@@ -131,7 +131,7 @@ object Hermit {
             this.isHermitProject = project.hasHermit()
 
             if (this.isHermitProject && this.status == HermitStatus.Enabled) {
-                log.debug(project.name + ": updating hermit status from disk")
+                log.info(project.name + ": updating hermit status from disk")
                 when(val prop =  project.hermitProperties()) {
                     is Failure -> {
                         log.warn(project.name + ": updating hermit status failed: " + prop.a)
