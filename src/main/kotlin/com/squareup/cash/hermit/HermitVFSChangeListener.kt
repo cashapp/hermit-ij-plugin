@@ -31,16 +31,17 @@ class HermitVFSChangeListener : BulkFileListener {
     private fun isHermitChange(project: Project, file: VirtualFile): Boolean {
         val root = project.guessProjectDir()
         // Check if we are in a bin/ directory
-        if (root == null || file.parent == null || file.parent.name != "bin") {
+        if (root == null || file.parent == null || (file.parent.name != "bin" && file.name != "bin")) {
             return false
         }
         // Check if we are at root bin/ directory
-        if (file.parent.parent != null && file.parent.parent != root) {
+        if (file.parent.parent != null && file.parent.parent != root && file.parent != root) {
             return false
         }
         val isPackageChange = file.name.endsWith(".pkg") && file.name.startsWith(".")
         val isHermitScriptChange = file.name == "hermit" || file.name == "hermit.hcl"
+        val isHermitBinCreation = file.name == "bin"
 
-        return isPackageChange || isHermitScriptChange
+        return isPackageChange || isHermitScriptChange || isHermitBinCreation
     }
 }

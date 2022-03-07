@@ -32,4 +32,12 @@ abstract class HermitProjectTestCase : JavaProjectTestCase() {
     protected fun waitAppThreads() {
         waitForAppLeakingThreads(1000, TimeUnit.MILLISECONDS)
     }
+
+    override fun setUpProject() {
+        super.setUpProject()
+
+        // Create the project root dir
+        Files.createDirectories(projectDirOrFile.parent)
+        updateVFS()
+    }
 }
