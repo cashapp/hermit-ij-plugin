@@ -7,6 +7,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.application.runWriteActionAndWait
 import com.intellij.openapi.externalSystem.service.execution.ExternalSystemJdkUtil
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.wm.WindowManager
@@ -16,6 +17,7 @@ import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarPresentation
 import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidget
 import junit.framework.TestCase
 import org.junit.Test
+import java.nio.file.Files
 
 class PluginIntegrationTest : HermitProjectTestCase() {
     @Test fun `test it negatively detects hermit correctly`() {
@@ -47,7 +49,12 @@ class PluginIntegrationTest : HermitProjectTestCase() {
 
     @Test fun `test it works if hermit is initialised after opening`() {
         Hermit(project).open()
+        TestCase.assertEquals(false, Hermit(project).hasHermit())
+
         withHermit(FakeHermit(listOf(TestPackage("name", "version", "", "root", mapOf(Pair("FOO", "BAR"))))))
+        waitAppThreads()
+        TestCase.assertEquals(true, Hermit(project).hasHermit())
+
         Hermit(project).enable()
         waitAppThreads()
 
