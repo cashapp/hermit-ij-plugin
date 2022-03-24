@@ -4,6 +4,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.squareup.cash.hermit.*
 
 @Service
@@ -19,6 +20,12 @@ class HermitJdkUpdater : HermitPropertyHandler {
                    hermitPackage.getSdk().setForProject(project)
                }
                UI.showInfo(project, "Hermit", "Switching to SDK ${hermitPackage.displayName()}")
+           }
+           if (projectSdk != null && hermitPackage.path != projectSdk.homePath) {
+               log.debug("updating (" + project.name + ") SDK (" + projectSdk.name + ") path from " + (projectSdk.homePath ?: "<null>") + " to " + hermitPackage.path)
+               ApplicationManager.getApplication()?.runWriteAction {
+                   ProjectJdkTable.getInstance().updateJdk(projectSdk, hermitPackage.newSdk())
+               }
            }
        }
     }
