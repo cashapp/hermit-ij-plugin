@@ -20,6 +20,7 @@ class HermitGoEnvUpdater : HermitPropertyHandler {
 
             if (
                 hermitPackage.version != sdk.version
+                || hermitPackage.goURL() != sdk.homeUrl
                 // If the current sdk has the same version,but it was not available before Hermit downloaded it,
                 // set it again to force re-indexing, and marking it as a valid one
                 || !sdk.isValid
