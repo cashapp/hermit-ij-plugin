@@ -13,14 +13,19 @@ fun Sdk.setForProject(project: Project) {
 }
 
 fun HermitPackage.getSdk(): Sdk {
-    return findInstalledSdk() ?: newSdk()
+    val installed = findInstalledSdk()
+    if (installed != null) {
+        return installed
+    }
+    val sdk = this.newSdk()
+    ProjectJdkTable.getInstance().addJdk(sdk)
+    return sdk
 }
 
 fun HermitPackage.newSdk(): Sdk {
     val type = JavaSdkImpl()
     val sdk = ProjectJdkImpl(sdkName(), type, path, version)
     type.setupSdkPaths(sdk)
-    ProjectJdkTable.getInstance().addJdk(sdk)
     return sdk
 }
 
