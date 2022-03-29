@@ -146,12 +146,12 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         TestCase.assertEquals("Hermit (openjdk@test)", sdk1.name)
         TestCase.assertEquals("/root1", sdk1.homePath)
 
+        ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk1) }
         withHermit(FakeHermit(listOf(
             TestPackage("openjdk", "", "test","/root2", emptyMap())
         )))
         Hermit(project).enable()
         waitAppThreads()
-        ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk1) }
 
         val sdk2 = ProjectRootManager.getInstance(project).projectSdk!!
         TestCase.assertEquals("Hermit (openjdk@test)", sdk2.name)
