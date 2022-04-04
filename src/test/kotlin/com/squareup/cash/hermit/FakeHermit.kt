@@ -5,12 +5,24 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.TimeUnit
 
 abstract class AbstractHermit {
     abstract fun writeTo(path: Path)
 }
 
 data class TestPackage(val name: String, val version: String, val channel: String, val root: String, val env: Map<String, String>)
+
+data class RealHermit(val root: Path, val packages: List<String>) : AbstractHermit() {
+    override fun writeTo(path: Path) {
+        "hermit init .".runCommand(root)
+        packages.forEach { install(it) }
+    }
+
+    fun install(pkg: String) {
+        "bin/hermit install $pkg".runCommand(root)
+    }
+}
 
 object BrokenHermit : AbstractHermit() {
     override fun writeTo(path: Path) {
@@ -63,4 +75,14 @@ data class FakeHermit(val packages: List<TestPackage>) : AbstractHermit() {
               |fi
             """.trimMargin())
     }
+}
+
+fun String.runCommand(workingDir: Path) {
+    val builder = ProcessBuilder(*split(" ").toTypedArray())
+        .directory(workingDir.toFile())
+        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+
+    builder.environment()["HERMIT_ENV"] = workingDir.toString()
+    builder.start().waitFor(60, TimeUnit.SECONDS)
 }

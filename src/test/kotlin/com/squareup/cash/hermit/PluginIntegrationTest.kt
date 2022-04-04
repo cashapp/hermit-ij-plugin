@@ -56,12 +56,13 @@ class PluginIntegrationTest : HermitProjectTestCase() {
     }
 
     @Test fun `test it sets the JDK home correctly`() {
-        withHermit(FakeHermit(listOf(TestPackage("openjdk", "1.0", "", "/root", emptyMap()))))
+        val path = System.getProperty("java.home")
+        withHermit(FakeHermit(listOf(TestPackage("openjdk", "1.0", "", path, emptyMap()))))
         Hermit(project).enable()
         waitAppThreads()
 
         val sdk = ProjectRootManager.getInstance(project).projectSdk!!
-        TestCase.assertEquals("/root", sdk.homePath)
+        TestCase.assertEquals(path, sdk.homePath)
 
         ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk) }
     }
@@ -95,14 +96,15 @@ class PluginIntegrationTest : HermitProjectTestCase() {
     }
 
     @Test fun `test it sets the Gradle JDK home correctly, if both JDK and Gradle are present`() {
+        val path = System.getProperty("java.home")
         withHermit(FakeHermit(listOf(
-            TestPackage("gradle", "1.0", "","/root", emptyMap()),
-            TestPackage("openjdk", "1.0", "","/root", emptyMap())
+            TestPackage("gradle", "1.0", "", path, emptyMap()),
+            TestPackage("openjdk", "1.0", "", path, emptyMap())
         )))
         Hermit(project).enable()
         waitAppThreads()
 
-        TestCase.assertEquals("/root", GradleUtils.findGradleProjectSettings(project)?.gradleHome)
+        TestCase.assertEquals(path, GradleUtils.findGradleProjectSettings(project)?.gradleHome)
         TestCase.assertEquals(ExternalSystemJdkUtil.USE_PROJECT_JDK, GradleUtils.findGradleProjectSettings(project)?.gradleJvm)
 
         val sdk = ProjectRootManager.getInstance(project).projectSdk!!
@@ -111,7 +113,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
 
     @Test fun `test it formats channel based JDK names correctly`() {
         withHermit(FakeHermit(listOf(
-            TestPackage("openjdk", "", "test","/root", emptyMap())
+            TestPackage("openjdk", "", "test", System.getProperty("java.home"), emptyMap())
         )))
         Hermit(project).enable()
         waitAppThreads()
@@ -124,7 +126,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
 
     @Test fun `test it formats version based JDK names correctly`() {
         withHermit(FakeHermit(listOf(
-            TestPackage("openjdk", "1.0", "","/root", emptyMap())
+            TestPackage("openjdk", "1.0", "", System.getProperty("java.home"), emptyMap())
         )))
         Hermit(project).enable()
         waitAppThreads()
@@ -133,31 +135,6 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         TestCase.assertEquals("Hermit (openjdk-1.0)", sdk.name)
 
         ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk) }
-    }
-
-    @Test fun `test it updates existing JDK if the path changes`() {
-        withHermit(FakeHermit(listOf(
-            TestPackage("openjdk", "", "test","/root1", emptyMap())
-        )))
-        Hermit(project).enable()
-        waitAppThreads()
-
-        val sdk1 = ProjectRootManager.getInstance(project).projectSdk!!
-        TestCase.assertEquals("Hermit (openjdk@test)", sdk1.name)
-        TestCase.assertEquals("/root1", sdk1.homePath)
-
-        ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk1) }
-        withHermit(FakeHermit(listOf(
-            TestPackage("openjdk", "", "test","/root2", emptyMap())
-        )))
-        Hermit(project).enable()
-        waitAppThreads()
-
-        val sdk2 = ProjectRootManager.getInstance(project).projectSdk!!
-        TestCase.assertEquals("Hermit (openjdk@test)", sdk2.name)
-        TestCase.assertEquals("/root2", sdk2.homePath)
-
-        ApplicationManager.getApplication()?.runWriteAction { ProjectJdkTable.getInstance().removeJdk(sdk2) }
     }
 
     @Test fun `test it shows the Hermit status as enabled if Hermit is enabled for the project`() {
@@ -202,5 +179,28 @@ class PluginIntegrationTest : HermitProjectTestCase() {
 
         val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)
         TestCase.assertNull(widget)
+    }
+
+    @Test fun `test changing a JDK via real hermit updates the project JDK correctly`() {
+        val hermit = RealHermit(projectDirOrFile.parent, listOf("openjdk-11.0.10_9"))
+        withHermit(hermit)
+        Hermit(project).open()
+        Hermit(project).enable()
+        waitAppThreads()
+
+        val sdk1 = ProjectRootManager.getInstance(project).projectSdk!!
+        TestCase.assertEquals("Hermit (openjdk-11.0.10_9)", sdk1.name)
+
+        hermit.install("openjdk@latest")
+        updateVFS()
+        waitAppThreads()
+
+        val sdk2 = ProjectRootManager.getInstance(project).projectSdk!!
+        TestCase.assertEquals("Hermit (openjdk@latest)", sdk2.name)
+
+        ApplicationManager.getApplication()?.runWriteAction {
+            ProjectJdkTable.getInstance().removeJdk(sdk2)
+            ProjectJdkTable.getInstance().removeJdk(sdk1)
+        }
     }
 }
