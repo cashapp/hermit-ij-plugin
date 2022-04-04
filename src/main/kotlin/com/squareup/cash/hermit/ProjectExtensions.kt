@@ -118,6 +118,7 @@ private fun Project.runHermit(vararg args: String): Result<Process> {
     val binDir = this.binDir()?.toNioPath()?.toFile()
     val commandLine = GeneralCommandLine(cmd, *args)
     commandLine.workDirectory = binDir
+    commandLine.environment["HERMIT_ENV"] = binDir?.parent
     val process = commandLine.createProcess()
     val exitCode = try {
         process.waitFor()

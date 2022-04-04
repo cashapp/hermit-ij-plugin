@@ -3,26 +3,15 @@ package com.squareup.cash.hermit
 import com.goide.sdk.GoSdkService
 import com.google.common.collect.ImmutableMap
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.diagnostic.ExceptionWithAttachments
 import com.intellij.openapi.externalSystem.service.execution.ExternalSystemJdkUtil
 import com.intellij.openapi.projectRoots.ProjectJdkTable
-import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
-import com.intellij.openapi.roots.AnnotationOrderRootType
-import com.intellij.openapi.roots.OrderRootType
 import com.intellij.openapi.roots.ProjectRootManager
-import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.vfs.impl.VirtualFilePointerContainerImpl
-import com.intellij.openapi.vfs.pointers.VirtualFilePointer
 import com.intellij.openapi.wm.WindowManager
-import com.intellij.testFramework.disposeApplicationAndCheckForLeaks
 import com.squareup.cash.hermit.gradle.GradleUtils
 import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarPresentation
 import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidget
 import junit.framework.TestCase
 import org.junit.Test
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 
 class PluginIntegrationTest : HermitProjectTestCase() {
     @Test fun `test it negatively detects hermit correctly`() {
@@ -190,5 +179,28 @@ class PluginIntegrationTest : HermitProjectTestCase() {
 
         val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)
         TestCase.assertNull(widget)
+    }
+
+    @Test fun `test changing a JDK via real hermit updates the project JDK correctly`() {
+        val hermit = RealHermit(projectDirOrFile.parent, listOf("openjdk-11.0.10_9"))
+        withHermit(hermit)
+        Hermit(project).open()
+        Hermit(project).enable()
+        waitAppThreads()
+
+        val sdk1 = ProjectRootManager.getInstance(project).projectSdk!!
+        TestCase.assertEquals("Hermit (openjdk-11.0.10_9)", sdk1.name)
+
+        hermit.install("openjdk@latest")
+        updateVFS()
+        waitAppThreads()
+
+        val sdk2 = ProjectRootManager.getInstance(project).projectSdk!!
+        TestCase.assertEquals("Hermit (openjdk@latest)", sdk2.name)
+
+        ApplicationManager.getApplication()?.runWriteAction {
+            ProjectJdkTable.getInstance().removeJdk(sdk2)
+            ProjectJdkTable.getInstance().removeJdk(sdk1)
+        }
     }
 }
