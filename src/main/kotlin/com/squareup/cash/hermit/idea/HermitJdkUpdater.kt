@@ -5,6 +5,8 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.ProjectJdkTable
+import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
+import com.intellij.openapi.util.Disposer
 import com.squareup.cash.hermit.*
 
 @Service
@@ -17,14 +19,27 @@ class HermitJdkUpdater : HermitPropertyHandler {
            if (hermitPackage.sdkName() != projectSdk?.name) {
                log.debug("setting project (" + project.name + ") SDK to " + hermitPackage.logString())
                ApplicationManager.getApplication()?.runWriteAction {
-                   hermitPackage.getSdk().setForProject(project)
+                   val installed = hermitPackage.findInstalledSdk()
+                   val sdk = if (installed != null) {
+                       installed
+                   } else {
+                       val new = hermitPackage.newSdk()
+                       ProjectJdkTable.getInstance().addJdk(new)
+                       new
+                   }
+                   sdk.setForProject(project)
                }
                UI.showInfo(project, "Hermit", "Switching to SDK ${hermitPackage.displayName()}")
            }
-           if (projectSdk != null && hermitPackage.path != projectSdk.homePath) {
-               log.debug("updating (" + project.name + ") SDK (" + projectSdk.name + ") path from " + (projectSdk.homePath ?: "<null>") + " to " + hermitPackage.path)
+           val currentSdk = project.projectSdk()
+           // Previous versions of the plugin created SDKs with the version unset.
+           // If so, update the SDK with one with version set correctly
+           val unVersionedSDK = (currentSdk?.versionString ?: "") == ""
+           if (currentSdk != null && (hermitPackage.path != currentSdk.homePath || unVersionedSDK)) {
+               log.debug("updating (" + project.name + ") SDK (" + currentSdk.name + ") path from " + (currentSdk.homePath ?: "<null>") + " to " + hermitPackage.path)
                ApplicationManager.getApplication()?.runWriteAction {
-                   ProjectJdkTable.getInstance().updateJdk(projectSdk, hermitPackage.newSdk())
+                   val sdk = hermitPackage.newSdk()
+                   ProjectJdkTable.getInstance().updateJdk(currentSdk, sdk)
                }
            }
        }
