@@ -15,9 +15,11 @@ class HermitVFSChangeListener : BulkFileListener {
         val needsUpdating = HashMap<String, Project>()
         events.forEach {
             val file = it.file
-            val project = ProjectLocator.getInstance().guessProjectForFile(file)
-            if (project != null && file != null && isHermitChange(project, file)) {
-                needsUpdating[project.name] = project
+            if (file != null) {
+                val project = ProjectLocator.getInstance().guessProjectForFile(file)
+                if (project != null && file != null && isHermitChange(project, file)) {
+                    needsUpdating[project.name] = project
+                }
             }
         }
 

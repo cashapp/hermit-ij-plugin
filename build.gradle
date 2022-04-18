@@ -4,7 +4,7 @@ plugins {
     id "idea"
     id "java"
     id 'org.jetbrains.intellij' version '1.1.4'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.32'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.0'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.32'
 }
 
@@ -13,8 +13,8 @@ ext {
 }
 
 // The latest supported versions. Note, these are updated automatically from update-major-versions.sh
-def IIC_VERSION = '213.5744.223'
-def GO_VERSION = '213.5744.269'
+def IIC_VERSION = '221.5080.210'
+def GO_VERSION = '221.5080.224'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
 def GO_PLUGIN_VERSION = IIC_VERSION
 // Test that the plugin still works on old releases
