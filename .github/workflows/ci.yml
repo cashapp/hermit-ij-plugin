@@ -14,6 +14,6 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Test
-        run: gradle test --info
+        run: gradle clean test --info
       - name: Plugin verification
-        run: gradle runPluginVerifier
+        run: gradle clean runPluginVerifier
