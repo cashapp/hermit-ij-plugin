@@ -18,6 +18,7 @@ import com.intellij.util.ThreeState
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import java.io.BufferedReader
+import java.lang.reflect.InvocationTargetException
 
 /**
  * Does the project have a hermit installation?
@@ -150,6 +151,16 @@ fun Project.isTrustedForHermit(): ThreeState {
 
         return ThreeState.fromBoolean(result)
     } catch (e: Exception) {
-        return ThreeState.UNSURE
+        when(e) {
+            is ClassNotFoundException,
+            is IllegalAccessException,
+            is IllegalArgumentException,
+            is InvocationTargetException -> {
+                return ThreeState.UNSURE
+            }
+            else -> {
+                throw e
+            }
+        }
     }
 }
