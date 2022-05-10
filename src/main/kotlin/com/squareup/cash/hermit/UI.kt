@@ -36,7 +36,7 @@ object UI {
     }
 
     fun explainProjectIsNotTrusted(project: Project) {
-        val message = "Untrusted Project: Running in safe mode."
+        val message = "Untrusted Project: hermit disabled."
         val notification = Notification("", "Hermit", message, NotificationType.ERROR)
 
         notification.addAction(object : NotificationAction("More Information") {

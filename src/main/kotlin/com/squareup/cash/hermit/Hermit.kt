@@ -72,9 +72,17 @@ object Hermit {
                     log.debug(project.name + ": hermit disabled in the project")
                     setStatus(HermitStatus.Disabled)
                     when (project.isTrustedForHermit()) {
-                        ThreeState.YES -> { this.enable() }
-                        ThreeState.NO -> { /* do nothing */ }
-                        ThreeState.UNSURE -> { UI.askToEnableHermit(project) }
+                        ThreeState.YES -> { 
+                            log.debug(project.name + ": project trusted, enabling")
+                            this.enable()
+                         }
+                        ThreeState.NO -> { 
+                            log.debug(project.name + ": project not trusted, skipping")
+                        }
+                        ThreeState.UNSURE -> { 
+                            log.debug(project.name + ": cannot verify if project can be trusted, asking user instead")
+                            UI.askToEnableHermit(project) 
+                        }
                     }
                 }
             } else if (!this.isHermitProject) {
