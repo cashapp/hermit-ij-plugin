@@ -9,6 +9,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
+import com.intellij.util.ThreeState
 import com.squareup.cash.hermit.action.BackgroundableWrapper
 import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidget
 import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidgetFactory
@@ -70,7 +71,11 @@ object Hermit {
                 } else {
                     log.debug(project.name + ": hermit disabled in the project")
                     setStatus(HermitStatus.Disabled)
-                    UI.askToEnableHermit(project)
+                    when (project.isTrustedForHermit()) {
+                        ThreeState.YES -> { this.enable() }
+                        ThreeState.NO -> { /* do nothing */ }
+                        ThreeState.UNSURE -> { UI.askToEnableHermit(project) }
+                    }
                 }
             } else if (!this.isHermitProject) {
                 log.debug(project.name + ": no hermit detected for " + project.name)

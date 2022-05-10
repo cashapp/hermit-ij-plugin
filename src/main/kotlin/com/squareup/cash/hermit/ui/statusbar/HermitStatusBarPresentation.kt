@@ -4,8 +4,10 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.util.Consumer
+import com.intellij.util.ThreeState
 import com.squareup.cash.hermit.Hermit
 import com.squareup.cash.hermit.UI
+import com.squareup.cash.hermit.isTrustedForHermit
 import java.awt.event.MouseEvent
 
 class HermitStatusBarPresentation(val project: Project) : StatusBarWidget.TextPresentation {
@@ -18,7 +20,11 @@ class HermitStatusBarPresentation(val project: Project) : StatusBarWidget.TextPr
       if (Hermit(project).hasHermit()) {
         val status = Hermit(project).hermitStatus()
         if (status == Hermit.HermitStatus.Disabled) {
-          UI.askToEnableHermit(project)
+          when (project.isTrustedForHermit()) {
+            ThreeState.YES -> { Hermit(project).enable() }
+            ThreeState.NO -> { UI.explainProjectIsNotTrusted(project) }
+            ThreeState.UNSURE -> { UI.askToEnableHermit(project) }
+          }
         } else if (status == Hermit.HermitStatus.Failed) {
           ApplicationManager.getApplication().invokeLater {
             Hermit(project).installAndUpdate()
