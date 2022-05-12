@@ -51,6 +51,7 @@ class HermitStatusBarPresentation(val project: Project) : StatusBarWidget.TextPr
       Hermit.HermitStatus.Enabled -> "Hermit enabled"
       Hermit.HermitStatus.Disabled -> "Hermit disabled"
       Hermit.HermitStatus.Failed -> "Hermit failed"
+      Hermit.HermitStatus.Installing -> "Hermit installing"
     }
   }
 

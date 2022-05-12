@@ -23,9 +23,10 @@ object Hermit {
     private val log: Logger = Logger.getInstance(this.javaClass)
 
     enum class HermitStatus {
-        Disabled,
-        Enabled,
-        Failed
+        Disabled, // Hermit is not in use
+        Installing, // Installing Hermit packages to the system
+        Enabled, // Hermit has been started correctly
+        Failed // Hermit initialisation has failed
     }
 
     private val HANDLER_EP_NAME: ExtensionPointName<HermitPropertyHandler> =
@@ -105,6 +106,7 @@ object Hermit {
 
         private fun runInstall() {
             log.info("installing hermit packages")
+            setStatus(HermitStatus.Installing)
             val task = BackgroundableWrapper(project, "Installing Hermit Packages", Runnable {
                 when (val result = project.installHermitPackages()) {
                     is Failure -> {

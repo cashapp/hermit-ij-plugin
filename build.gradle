@@ -18,8 +18,8 @@ def GO_VERSION = '221.5080.224'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
 def GO_PLUGIN_VERSION = IIC_VERSION
 // Test that the plugin still works on old releases
-def IIC_FROM_VERSION = '203.6682.168'
-def GO_FROM_VERSION = '203.6682.164'
+def IIC_FROM_VERSION = '212.4746.92'
+def GO_FROM_VERSION = '212.4746.93'
 
 group 'com.squareup.cash.hermit'
 version project.getProperties().getOrDefault("version", '1.0-SNAPSHOT')
@@ -68,8 +68,11 @@ runPluginVerifier {
     ideVersions = ['IIC-' + IIC_FROM_VERSION, 'GO-' + GO_FROM_VERSION, 'IIC-'+ IIC_VERSION, 'GO-' + GO_VERSION]
     failureLevel = EnumSet.complementOf(
             EnumSet.of(
-                    // skipping missing dependencies as com.intellij.java provided bi IJ raises a false warning
-                    RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES
+                    // skipping missing dependencies as com.intellij.java provided by IJ raises a false warning
+                    RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES,
+                    // skipping experimental API usage, as delaying Gradle execution relies on experimental GradleExecutionAware.
+                    // if the API changes, we should be able to detect that in our tests when a new version comes out.
+                    RunPluginVerifierTask.FailureLevel.EXPERIMENTAL_API_USAGES
             )
     )
 
