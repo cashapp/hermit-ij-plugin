@@ -17,7 +17,7 @@ def IIC_VERSION = '221.5080.210'
 def GO_VERSION = '221.5080.224'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
 def GO_PLUGIN_VERSION = IIC_VERSION
-// Test that the plugin still works on old releases
+// The oldest supported versions.
 def IIC_FROM_VERSION = '212.4746.92'
 def GO_FROM_VERSION = '212.4746.93'
 
@@ -58,7 +58,7 @@ runIde {
 }
 
 patchPluginXml {
-    sinceBuild = '203.5981.41'
+    sinceBuild = IIC_FROM_VERSION
     version = System.getenv("IJ_PLUGIN_VERSION")
 }
 
