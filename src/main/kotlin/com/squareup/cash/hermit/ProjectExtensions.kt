@@ -66,6 +66,20 @@ fun Project.installHermitPackages(): Result<Unit> {
     }
 }
 
+fun Project.hermitVersion(): Result<String> {
+    return if ( !hasHermit() ) {
+        success("no hermit found")
+    } else {
+        runHermit("version").map{ readText(it.stdout()).trim() }
+    }
+}
+
+private fun readText(from: BufferedReader): String {
+    val result = from.readText()
+    from.close()
+    return result
+}
+
 private fun environmentFrom(lines: List<String>): HashMap<String, String> {
     return lines.fold(HashMap()) { vars, line ->
         val res = line.split("=", limit = 2)
@@ -77,7 +91,7 @@ private fun environmentFrom(lines: List<String>): HashMap<String, String> {
 private fun Project.packagesFor(refs: List<String>): Result<List<HermitPackage>> {
     return if ( refs.nonEmpty() ) {
         runHermit("info", "--json", *refs.toTypedArray())
-            .map { it.stdout().readText() }
+            .map { readText(it.stdout()) }
             .flatMap { hermitPackages(Json.parseToJsonElement(it)) }
     } else {
         success(emptyList())
@@ -128,7 +142,7 @@ private fun Project.runHermit(vararg args: String): Result<Process> {
         return failure("Exception while running $cmd <br/>" + (e.message ?: e.javaClass.simpleName))
     }
     return if ( exitCode != 0 ) {
-        failure("Error while running $cmd <br/>" + process.errorStream.bufferedReader().readText())
+        failure("Error while running $cmd <br/>" + readText(process.errorStream.bufferedReader()))
     } else {
         success(process)
     }

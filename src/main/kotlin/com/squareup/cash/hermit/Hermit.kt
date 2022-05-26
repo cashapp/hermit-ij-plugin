@@ -1,5 +1,6 @@
 package com.squareup.cash.hermit
 
+import arrow.core.flatMap
 import com.google.common.collect.ImmutableMap
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.application.ApplicationManager
@@ -147,17 +148,18 @@ object Hermit {
 
             if (this.isHermitProject && this.status == HermitStatus.Enabled) {
                 log.info(project.name + ": updating hermit status from disk")
-                when(val prop =  project.hermitProperties()) {
+                when(val res =  project.hermitProperties().flatMap { prop -> project.hermitVersion().map { Pair(it, prop) }}) {
                     is Failure -> {
-                        log.warn(project.name + ": updating hermit status failed: " + prop.a)
+                        log.warn(project.name + ": updating hermit status failed: " + res.a)
                         this.isHermitProject = false
-                        UI.showError(project, prop.a)
+                        UI.showError(project, res.a)
                         setStatus(HermitStatus.Failed)
                     }
                     is Success -> {
-                        log.info(project.name + ": updating hermit status succeeded: " + prop.b.logString())
-                        this.properties = prop.b
-                        prop.b.packages.forEach { updateHandlers(it) }
+                        log.info(project.name + ": Hermit version: " + res.b.first)
+                        log.info(project.name + ": updating hermit status succeeded: " + res.b.second.logString())
+                        this.properties = res.b.second
+                        res.b.second.packages.forEach { updateHandlers(it) }
                     }
                 }
             }
