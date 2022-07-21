@@ -7,7 +7,7 @@ import com.intellij.openapi.project.ProjectManager
 class HermitDynamicPluginListener : DynamicPluginListener {
     // Called when the plugin is installed
     override fun pluginLoaded(pluginDescriptor: IdeaPluginDescriptor) {
-        if (pluginDescriptor.pluginId?.idString == Plugin.ID) {
+        if (pluginDescriptor.pluginId.idString == Plugin.ID) {
             val projects = ProjectManager.getInstance().openProjects
             projects.forEach { Hermit(it).open() }
         }
