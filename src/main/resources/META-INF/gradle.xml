@@ -1,7 +1,6 @@
 <idea-plugin>
     <extensions defaultExtensionNs="org.jetbrains.plugins.gradle">
         <executionEnvironmentProvider implementation="com.squareup.cash.hermit.execution.HermitGradleAppEnvProvider" order="first" />
-        <executionEnvironmentProvider implementation="com.squareup.cash.hermit.execution.HermitGradleTaskEnvProvider" order="first" />
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij">
