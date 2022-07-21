@@ -108,7 +108,7 @@ object Hermit {
         private fun runInstall() {
             log.info("installing hermit packages")
             setStatus(HermitStatus.Installing)
-            val task = BackgroundableWrapper(project, "Installing Hermit Packages", Runnable {
+            val task = BackgroundableWrapper(project, "Installing Hermit Packages") {
                 when (val result = project.installHermitPackages()) {
                     is Failure -> {
                         log.warn(project.name + ": installing hermit packages failed: " + result.a)
@@ -117,14 +117,17 @@ object Hermit {
                     }
                     is Success -> {
                         log.info(project.name + ": installing hermit packages succeeded")
-                        // We need to enable hermit in a Write enabled thread
-                        ApplicationManager.getApplication().invokeLater {
-                            setStatus(HermitStatus.Enabled)
-                            Hermit(project).update()
+                        // Installing may finish after the project has been closed.
+                        if (!project.isDisposed) {
+                            // We need to enable hermit in a Write-enabled thread
+                            ApplicationManager.getApplication().invokeLater {
+                                setStatus(HermitStatus.Enabled)
+                                Hermit(project).update()
+                            }
                         }
                     }
                 }
-            })
+            }
             ProgressManager.getInstance().run(task)
         }
 
