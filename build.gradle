@@ -49,7 +49,14 @@ intellij {
     // https://plugins.jetbrains.com/plugin/9568-go/versions
     version = IIC_VERSION
     type = 'IU'
-    plugins = ["gradle", "java", "terminal", "org.jetbrains.plugins.go:" + GO_PLUGIN_VERSION]
+    plugins = [
+            "gradle",
+            "java",
+            "terminal",
+            "org.jetbrains.plugins.go:" + GO_PLUGIN_VERSION,
+            // needed by Go plugin. See https://github.com/JetBrains/gradle-intellij-plugin/issues/1056
+            "org.intellij.intelliLang"
+    ]
 }
 
 runIde {
