@@ -64,8 +64,14 @@ object Hermit {
             val hermitEnabled = props.getBoolean(PropertyID.HermitEnabled, false)
             this.isHermitProject = project.hasHermit()
 
-            if (this.isHermitProject && !this.isHermitOpened) {
-                log.debug("opening project " + project.name)
+            if (this.isHermitOpened) {
+                this.refreshUI()
+                return
+            }
+
+            log.info("opening project " + project.name)
+            if (this.isHermitProject) {
+                log.info("enabling Hermit for " + project.name)
                 this.isHermitOpened = true
                 if (hermitEnabled) {
                     log.debug(project.name + ": hermit enabled in the project")
@@ -87,8 +93,8 @@ object Hermit {
                         }
                     }
                 }
-            } else if (!this.isHermitProject) {
-                log.debug(project.name + ": no hermit detected for " + project.name)
+            } else {
+                log.info(project.name + ": no hermit detected for " + project.name)
                 setStatus(HermitStatus.Disabled)
             }
             this.refreshUI()
