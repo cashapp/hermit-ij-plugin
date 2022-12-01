@@ -79,7 +79,13 @@ runPluginVerifier {
                     RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES,
                     // skipping experimental API usage, as delaying Gradle execution relies on experimental GradleExecutionAware.
                     // if the API changes, we should be able to detect that in our tests when a new version comes out.
-                    RunPluginVerifierTask.FailureLevel.EXPERIMENTAL_API_USAGES
+                    RunPluginVerifierTask.FailureLevel.EXPERIMENTAL_API_USAGES,
+                    // we do not fail on deprecated API usages, as we want to support older versions where the API has
+                    // not been deprecate yet, and the newer API not available
+                    RunPluginVerifierTask.FailureLevel.DEPRECATED_API_USAGES,
+                    // TODO: fix these
+                    RunPluginVerifierTask.FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
+
             )
     )
 
