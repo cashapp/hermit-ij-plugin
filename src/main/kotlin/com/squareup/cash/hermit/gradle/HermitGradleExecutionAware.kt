@@ -6,6 +6,7 @@ import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskNotifica
 import com.intellij.openapi.project.Project
 import com.squareup.cash.hermit.Hermit
 import org.jetbrains.annotations.ApiStatus
+import org.jetbrains.plugins.gradle.service.execution.BuildLayoutParameters
 import org.jetbrains.plugins.gradle.service.execution.GradleExecutionAware
 
 class HermitGradleExecutionAware: GradleExecutionAware {
@@ -40,6 +41,12 @@ class HermitGradleExecutionAware: GradleExecutionAware {
       log.debug("done waiting for 'hermit install'")
     }
   }
+
+  override fun getBuildLayoutParameters(project: Project, projectPath: String): BuildLayoutParameters? = null
+
+  override fun getDefaultBuildLayoutParameters(project: Project): BuildLayoutParameters? = null
+
+  override fun isGradleInstallationHomeDir(project: Project, homePath: String): Boolean = false
 
   companion object {
     const val TIMEOUT_MS = 120000
