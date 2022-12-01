@@ -13,7 +13,7 @@ ext {
 }
 
 // The latest supported versions. Note, these are updated automatically from update-major-versions.sh
-def IIC_VERSION = '222.3345.118'
+def IIC_VERSION = '223.7571.182'
 def GO_VERSION = '222.3345.118'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
 def GO_PLUGIN_VERSION = IIC_VERSION
