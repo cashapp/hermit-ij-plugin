@@ -8,9 +8,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.wm.StatusBarWidgetFactory
 import com.intellij.openapi.wm.WindowManager
-import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetSettings
 import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
 import com.intellij.util.ThreeState
 import com.squareup.cash.hermit.action.BackgroundableWrapper
@@ -33,7 +31,7 @@ object Hermit {
     }
 
     private val HANDLER_EP_NAME: ExtensionPointName<HermitPropertyHandler> =
-        ExtensionPointName.create<HermitPropertyHandler>("org.squareup.cash.hermit.idea-plugin.property-handler")
+        ExtensionPointName("org.squareup.cash.hermit.idea-plugin.property-handler")
 
     private val projects = ConcurrentHashMap<String, State>()
 
@@ -75,7 +73,6 @@ object Hermit {
             if (this.isHermitProject) {
                 log.info("enabling Hermit for " + project.name)
                 this.isHermitOpened = true
-
                 if (hermitEnabled) {
                     log.debug(project.name + ": hermit enabled in the project")
                     this.runInstall()
@@ -150,8 +147,7 @@ object Hermit {
             ApplicationManager.getApplication().invokeLater {
                 statusBarWidgetsManager.updateWidget(HermitStatusBarWidgetFactory::class.java)
 
-                val statusbar = WindowManager.getInstance().getStatusBar(project)
-                statusbar?.updateWidget(HermitStatusBarWidget.ID)
+                WindowManager.getInstance().getStatusBar(project)?.updateWidget(HermitStatusBarWidget.ID)
             }
         }
 
