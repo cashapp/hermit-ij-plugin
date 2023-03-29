@@ -146,8 +146,8 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         waitAppThreads()
 
         val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
-        val presentation = widget.presentation as HermitStatusBarPresentation
-        TestCase.assertEquals("Hermit enabled", presentation.text)
+        val presentation = widget.getPresentation() as HermitStatusBarPresentation
+        TestCase.assertEquals("Hermit enabled", presentation.getText())
     }
 
     @Test fun `test it shows the Hermit status as failed if Hermit execution fails when opening the project`() {
@@ -157,8 +157,8 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         waitAppThreads()
 
         val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
-        val presentation = widget.presentation as HermitStatusBarPresentation
-        TestCase.assertEquals("Hermit failed", presentation.text)
+        val presentation = widget.getPresentation() as HermitStatusBarPresentation
+        TestCase.assertEquals("Hermit failed", presentation.getText())
     }
 
     @Test fun `test it does not shows the Hermit status if there is no Hermit in the project`() {

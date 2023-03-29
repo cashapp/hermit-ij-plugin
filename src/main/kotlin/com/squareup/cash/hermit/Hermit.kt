@@ -31,7 +31,7 @@ object Hermit {
     }
 
     private val HANDLER_EP_NAME: ExtensionPointName<HermitPropertyHandler> =
-        ExtensionPointName.create<HermitPropertyHandler>("org.squareup.cash.hermit.idea-plugin.property-handler")
+        ExtensionPointName("org.squareup.cash.hermit.idea-plugin.property-handler")
 
     private val projects = ConcurrentHashMap<String, State>()
 
