@@ -39,7 +39,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolsCustomizer implementation="com.squareup.cash.hermit.execution.HermitToolsCustomiser" />
-        <statusBarWidgetFactory implementation="com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidgetFactory"/>
+        <statusBarWidgetFactory id="HermitStatusBarWidgetFactory" implementation="com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidgetFactory"/>
     </extensions>
 
     <extensionPoints>

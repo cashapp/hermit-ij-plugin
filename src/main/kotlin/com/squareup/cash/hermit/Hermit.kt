@@ -8,7 +8,9 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.StatusBarWidgetFactory
 import com.intellij.openapi.wm.WindowManager
+import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetSettings
 import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
 import com.intellij.util.ThreeState
 import com.squareup.cash.hermit.action.BackgroundableWrapper
@@ -73,6 +75,7 @@ object Hermit {
             if (this.isHermitProject) {
                 log.info("enabling Hermit for " + project.name)
                 this.isHermitOpened = true
+
                 if (hermitEnabled) {
                     log.debug(project.name + ": hermit enabled in the project")
                     this.runInstall()
@@ -147,7 +150,8 @@ object Hermit {
             ApplicationManager.getApplication().invokeLater {
                 statusBarWidgetsManager.updateWidget(HermitStatusBarWidgetFactory::class.java)
 
-                WindowManager.getInstance().getStatusBar(project)?.updateWidget(HermitStatusBarWidget.ID)
+                val statusbar = WindowManager.getInstance().getStatusBar(project)
+                statusbar?.updateWidget(HermitStatusBarWidget.ID)
             }
         }
 
