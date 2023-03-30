@@ -7,6 +7,7 @@ import org.jetbrains.plugins.terminal.LocalTerminalCustomizer
 class HermitShellCommandCustomiser : LocalTerminalCustomizer() {
     override fun customizeCommandAndEnvironment(
         project: Project,
+        workingDirectory: String?,
         command: Array<out String>,
         envs: MutableMap<String, String>
     ): Array<String> {
@@ -16,6 +17,6 @@ class HermitShellCommandCustomiser : LocalTerminalCustomizer() {
             // GO SDK binary to be first in the path.
             envs.remove("_INTELLIJ_FORCE_PREPEND_PATH")
         }
-        return super.customizeCommandAndEnvironment(project, command, envs)
+        return super.customizeCommandAndEnvironment(project, workingDirectory, command, envs)
     }
 }
