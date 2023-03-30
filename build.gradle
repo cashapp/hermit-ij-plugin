@@ -18,8 +18,8 @@ def GO_VERSION = '223.8836.56'
 // Unfortunately the GoLand releases do not completely match the Go plugin releases
 def GO_PLUGIN_VERSION = IIC_VERSION
 // The oldest supported versions.
-def IIC_FROM_VERSION = '212.4746.92'
-def GO_FROM_VERSION = '212.4746.93'
+def IIC_FROM_VERSION = '222.4554.10'
+def GO_FROM_VERSION = '222.4554.12'
 
 group 'com.squareup.cash.hermit'
 version project.getProperties().getOrDefault("version", '1.0-SNAPSHOT')

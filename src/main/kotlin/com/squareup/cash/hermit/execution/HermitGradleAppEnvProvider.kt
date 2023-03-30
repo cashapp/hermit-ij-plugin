@@ -73,7 +73,7 @@ class HermitGradleAppEnvProvider : GradleExecutionEnvironmentProvider {
      * Rely on the existing GradleApplicationEnvironmentProvider to give us the initial config
      */
     private fun delegateProvider(task: ExecuteRunConfigurationTask): GradleExecutionEnvironmentProvider? {
-        val extensions = GradleExecutionEnvironmentProvider.EP_NAME.extensions()
+        val extensions = GradleExecutionEnvironmentProvider.EP_NAME.getExtensionList(null).stream()
         return extensions
             .filter { provider -> provider !== this && provider.isApplicable(task) }
             .findFirst().orElse(null)
