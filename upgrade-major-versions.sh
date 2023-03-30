@@ -7,7 +7,7 @@
 latestRelease() {
   typeCode=$1
   url="https://data.services.jetbrains.com/products?fields=code,releases.build,releases.type&code=${typeCode}"
-  curl -s "${url}" | jq '[.[0]|.releases|.[]|select(.type=="release")|.build][0]' | tr -d '"'
+  curl -s "${url}" | jq '[.[0]|.releases|.[]|select((.type=="release") or (.type=="eap"))|.build][0]' | tr -d '"'
 }
 
 # Returns the latest IDE version used to build the plugin for the given IDE
