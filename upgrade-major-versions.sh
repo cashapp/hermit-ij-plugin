@@ -13,7 +13,7 @@ latestRelease() {
 # Returns the latest IDE version used to build the plugin for the given IDE
 currentVersion() {
   typeCode=$1
-  grep "def ${typeCode}_VERSION" build.gradle | sed "s/^[^']*'\([^']*\)'.*/\1/"
+  grep "val ${typeCode}_VERSION" build.gradle.kts | sed "s/^[^\"]*\"\([^\"]*\)'.*/\1/"
 }
 
 # Returns the major version for the given full version string
@@ -26,7 +26,7 @@ majorVersion() {
 setVersion() {
   typeCode=$1
   version=$2
-  sed -i.bak "s/^def ${typeCode}_VERSION = .*$/def ${typeCode}_VERSION = \'${version}\'/g" build.gradle
+  sed -i.bak "s/^val ${typeCode}_VERSION = .*$/val ${typeCode}_VERSION = \"${version}\"/g" build.gradle.kts
 }
 
 # Updates the version for given product type in the build file if the major version
