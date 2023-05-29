@@ -20,13 +20,39 @@ java {
 }
 
 // The latest supported versions. Note, these are updated automatically from update-major-versions.sh
-val IIC_VERSION = "231.8109.175"
-val GO_VERSION = "231.8109.46"
-// Unfortunately the GoLand releases do not completely match the Go plugin releases
-val GO_PLUGIN_VERSION = IIC_VERSION
+val IIC_RELEASE_VERSION = "231.8109.175"
+val IIC_EAP_VERSION = "232.6095.10"
+val GO_RELEASE_VERSION = "231.8109.46"
+val GO_EAP_VERSION = "232.6095.10"
 // The oldest supported versions.
 val IIC_FROM_VERSION = "222.4554.10"
 val GO_FROM_VERSION = "222.4554.12"
+
+data class Product(
+  val name: String, // identifier for this product
+  val sdkVersion: String, // the version string passed to the intellij sdk gradle plugin
+  val goPluginVersion: String, // a specific version for the go plugin
+  val intellijVersion: String,
+  val golandVersion: String,
+)
+
+val products = listOf(
+  Product(
+    name = "release",
+    sdkVersion = IIC_RELEASE_VERSION,
+    goPluginVersion = IIC_RELEASE_VERSION,
+    intellijVersion = IIC_RELEASE_VERSION,
+    golandVersion = GO_RELEASE_VERSION,
+  ),
+  Product(
+    name = "eap",
+    sdkVersion = "LATEST-EAP-SNAPSHOT",
+    goPluginVersion = IIC_EAP_VERSION,
+    intellijVersion = IIC_EAP_VERSION,
+    golandVersion = GO_EAP_VERSION,
+  ),
+)
+val product = products.first { it.name == (System.getenv("PRODUCT_NAME") ?: "release") }
 
 val kotlin_version = "1.8.10"
 
@@ -51,15 +77,16 @@ dependencies {
 intellij {
   // Note: The IntelliJ version below needs to match the go plugin version as defined here:
   // https://plugins.jetbrains.com/plugin/9568-go/versions
-  version.set(IIC_VERSION)
+  version.set(product.sdkVersion)
   type.set("IU")
   plugins.set(
     listOf(
       "gradle",
       "java",
       "terminal",
-      "org.jetbrains.plugins.go:$GO_PLUGIN_VERSION",
-      // needed by Go plugin. See https://github.com/JetBrains/gradle-intellij-plugin/issues/1056
+      // This version is in sync with the IJ version, but not in sync with the GoLand version.
+      "org.jetbrains.plugins.go:${product.goPluginVersion}",
+      // Needed by Go plugin. See https://github.com/JetBrains/gradle-intellij-plugin/issues/1056
       "org.intellij.intelliLang"
     )
   )
@@ -78,10 +105,20 @@ tasks.withType<PatchPluginXmlTask> {
 tasks.withType<RunPluginVerifierTask> {
   // These need to match the versions from
   // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
-  ideVersions.set(listOf("IIC-$IIC_FROM_VERSION", "GO-$GO_FROM_VERSION", "IIC-$IIC_VERSION", "GO-$GO_VERSION"))
+  ideVersions.set(
+    listOf(
+      "IIC-$IIC_FROM_VERSION",
+      "GO-$GO_FROM_VERSION",
+      "IIC-${product.intellijVersion}",
+      "GO-${product.golandVersion}"
+    )
+  )
   failureLevel.set(
     EnumSet.complementOf(
       EnumSet.of(
+        // skipping compatibility problems due to potential false positive with EAP v232:
+        // Method com.squareup.cash.hermit.HermitVFSChangeListener.after(List events) : void references an unresolved class com.intellij.openapi.project.ProjectLocator.Companion. This can lead to **NoSuchClassError** exception at runtime.
+        RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS,
         // skipping missing dependencies as com.intellij.java provided by IJ raises a false warning
         RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES,
         // skipping experimental API usage, as delaying Gradle execution relies on experimental GradleExecutionAware.
