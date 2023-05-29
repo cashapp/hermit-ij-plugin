@@ -6,6 +6,9 @@ name: Release
 jobs:
   deployable:
     name: Stable IJ Plugin
+    strategy:
+      matrix:
+        product: [release, eap]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,6 +22,7 @@ jobs:
           ./bin/gradle test --info
       - name: Publish
         env:
+          PRODUCT_NAME: ${{ matrix.product }}
           JETBRAINS_TOKEN: ${{ secrets.JETBRAINS_PLUGIN_TOKEN }}
         run: |
           export IJ_PLUGIN_VERSION=$(git describe --tags --abbrev=0 | sed s,^v,,)
