@@ -99,7 +99,7 @@ tasks.withType<RunIdeTask> {
 
 tasks.withType<PatchPluginXmlTask> {
   sinceBuild.set(IIC_FROM_VERSION)
-  version.set(System.getenv("IJ_PLUGIN_VERSION"))
+  version.set(System.getenv("IJ_PLUGIN_VERSION")) // IJ_PLUGIN_VERSION env var available in CI
 }
 
 tasks.withType<RunPluginVerifierTask> {
@@ -135,7 +135,7 @@ tasks.withType<RunPluginVerifierTask> {
 }
 
 tasks.withType<PublishPluginTask> {
-  token.set(System.getenv("JETBRAINS_TOKEN"))
+  token.set(System.getenv("JETBRAINS_TOKEN")) // JETBRAINS_TOKEN env var available in CI
 }
 
 val ARROW_VERSION = "0.11.0"
