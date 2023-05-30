@@ -60,7 +60,7 @@ val IIC_FROM_VERSION = "222.4554.10"
 val GO_FROM_VERSION = "222.4554.12"
 
 data class Product(
-  val name: String, // identifier for this product
+  val releaseType: String, // identifier for this product
   val sdkVersion: String, // the version string passed to the intellij sdk gradle plugin
   val goPluginVersion: String, // a specific version for the go plugin
   val intellijVersion: String,
@@ -69,21 +69,21 @@ data class Product(
 
 val products = listOf(
   Product(
-    name = "release",
+    releaseType = "release",
     sdkVersion = IIC_RELEASE_VERSION,
     goPluginVersion = IIC_RELEASE_VERSION,
     intellijVersion = IIC_RELEASE_VERSION,
     golandVersion = GO_RELEASE_VERSION,
   ),
   Product(
-    name = "eap",
+    releaseType = "eap",
     sdkVersion = "LATEST-EAP-SNAPSHOT",
     goPluginVersion = IIC_EAP_VERSION,
     intellijVersion = IIC_EAP_VERSION,
     golandVersion = GO_EAP_VERSION,
   ),
 )
-val product = products.first { it.name == (System.getenv("PRODUCT_NAME") ?: "release") }
+val product = products.first { it.releaseType == (System.getenv("RELEASE_TYPE") ?: "release") }
 
 intellij {
   // Note: The IntelliJ version below needs to match the go plugin version as defined here:
