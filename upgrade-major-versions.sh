@@ -14,22 +14,22 @@ latestRelease() {
 # Returns the latest IDE version used to build the plugin for the given IDE
 currentVersion() {
   typeCode=$1
-  releaseType=$(echo "$2" | tr "[:lower:]" "[:upper:]")
-  grep "val ${typeCode}_${releaseType}_VERSION" build.gradle.kts | sed "s/^[^\"]*\"\([^\"]*\)\".*/\1/"
+  releaseType=$2
+  grep "${typeCode}.${releaseType}.version" gradle.properties | sed "s/^.*=\(.*\)/\1/"
 }
 
 # Returns the major version for the given full version string
 majorVersion() {
   version=$1
-  echo "${version}" | sed "s/^\([^.]*\).*/\1/"
+  echo "${version//^\([^.]*\).*/\1/}"
 }
 
 # Sets the version for the given product type in the build file
 setVersion() {
   typeCode=$1
   version=$2
-  releaseType=$(echo "$3" | tr "[:lower]" "[:upper]")
-  sed -i.bak "s/^val ${typeCode}_${releaseType}_VERSION = .*$/val ${typeCode}_${releaseType}_VERSION = \"${version}\"/g" build.gradle.kts
+  releaseType=$3
+  sed -i.bak "s/^${typeCode}\.${releaseType}\.version=.*$/${typeCode}.${releaseType}.version=${version}/g" gradle.properties
 }
 
 # Updates the version for given product type in the build file if the major version
