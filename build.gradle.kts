@@ -1,9 +1,8 @@
-import org.jetbrains.intellij.tasks.PatchPluginXmlTask
-import org.jetbrains.intellij.tasks.PublishPluginTask
-import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.EnumSet
+
+group = "com.squareup.cash.hermit"
+version = project.properties["version"] ?: "1.0-SNAPSHOT"
 
 plugins {
   id("idea")
@@ -14,10 +13,41 @@ plugins {
   id("org.jetbrains.kotlin.plugin.serialization") version "1.4.32"
 }
 
+// region Build, dependencies
+val kotlin_version = "1.8.10"
+val ARROW_VERSION = "0.11.0"
+
 java {
   sourceCompatibility = JavaVersion.VERSION_17
   targetCompatibility = JavaVersion.VERSION_11
 }
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
+  implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+  implementation("io.arrow-kt:arrow-core:$ARROW_VERSION")
+  implementation("io.arrow-kt:arrow-syntax:$ARROW_VERSION")
+  kapt("io.arrow-kt:arrow-meta:$ARROW_VERSION")
+}
+
+tasks {
+  compileKotlin {
+    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=enable")
+  }
+
+  test {
+    systemProperty("idea.force.use.core.classloader", "true")
+  }
+}
+// endregion
+
+// region IJ Plugin setup
 
 // The latest supported versions. Note, these are updated automatically from update-major-versions.sh
 val IIC_RELEASE_VERSION = "231.8109.175"
@@ -54,26 +84,6 @@ val products = listOf(
 )
 val product = products.first { it.name == (System.getenv("PRODUCT_NAME") ?: "release") }
 
-val kotlin_version = "1.8.10"
-
-group = "com.squareup.cash.hermit"
-version = project.properties["version"] ?: "1.0-SNAPSHOT"
-
-tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = "11"
-  kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=enable")
-}
-
-repositories {
-  mavenCentral()
-}
-
-dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-  implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
-}
-
 intellij {
   // Note: The IntelliJ version below needs to match the go plugin version as defined here:
   // https://plugins.jetbrains.com/plugin/9568-go/versions
@@ -91,66 +101,57 @@ intellij {
     )
   )
 }
+tasks {
+  runIde {
+    // Uncomment this, and set your path accordingly, if you want to debug on GoLand
+    // ideDirectory "/Users/juho/Library/Application Support/JetBrains/Toolbox/apps/Goland/ch-0/203.6682.164/GoLand.app/Contents"
+  }
 
-tasks.withType<RunIdeTask> {
-  // Uncomment this, and set your path accordingly, if you want to debug on GoLand
-  // ideDirectory "/Users/juho/Library/Application Support/JetBrains/Toolbox/apps/Goland/ch-0/203.6682.164/GoLand.app/Contents"
-}
+  patchPluginXml {
+    sinceBuild.set(IIC_FROM_VERSION)
+    version.set(System.getenv("IJ_PLUGIN_VERSION")) // IJ_PLUGIN_VERSION env var available in CI
+  }
 
-tasks.withType<PatchPluginXmlTask> {
-  sinceBuild.set(IIC_FROM_VERSION)
-  version.set(System.getenv("IJ_PLUGIN_VERSION")) // IJ_PLUGIN_VERSION env var available in CI
-}
-
-tasks.withType<RunPluginVerifierTask> {
-  // These need to match the versions from
-  // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
-  ideVersions.set(
-    listOf(
-      "IIC-$IIC_FROM_VERSION",
-      "GO-$GO_FROM_VERSION",
-      "IIC-${product.intellijVersion}",
-      "GO-${product.golandVersion}"
-    )
-  )
-  failureLevel.set(
-    EnumSet.complementOf(
-      EnumSet.of(
-        // skipping compatibility problems due to potential false positive with EAP v232:
-        // Method com.squareup.cash.hermit.HermitVFSChangeListener.after(List events) : void references an unresolved class com.intellij.openapi.project.ProjectLocator.Companion. This can lead to **NoSuchClassError** exception at runtime.
-        RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS,
-        // skipping missing dependencies as com.intellij.java provided by IJ raises a false warning
-        RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES,
-        // skipping experimental API usage, as delaying Gradle execution relies on experimental GradleExecutionAware.
-        // if the API changes, we should be able to detect that in our tests when a new version comes out.
-        RunPluginVerifierTask.FailureLevel.EXPERIMENTAL_API_USAGES,
-        // we do not fail on deprecated API usages, as we want to support older versions where the API has
-        // not been deprecate yet, and the newer API not available
-        RunPluginVerifierTask.FailureLevel.DEPRECATED_API_USAGES,
-        // TODO: fix these
-        RunPluginVerifierTask.FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
+  runPluginVerifier {
+    // These need to match the versions from
+    // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
+    ideVersions.set(
+      listOf(
+        "IIC-$IIC_FROM_VERSION",
+        "GO-$GO_FROM_VERSION",
+        "IIC-${product.intellijVersion}",
+        "GO-${product.golandVersion}"
       )
     )
-  )
-}
+    failureLevel.set(
+      EnumSet.complementOf(
+        EnumSet.of(
+          // skipping compatibility problems due to potential false positive with EAP v232:
+          // Method com.squareup.cash.hermit.HermitVFSChangeListener.after(List events) : void references an unresolved class com.intellij.openapi.project.ProjectLocator.Companion. This can lead to **NoSuchClassError** exception at runtime.
+          RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS,
+          // skipping missing dependencies as com.intellij.java provided by IJ raises a false warning
+          RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES,
+          // skipping experimental API usage, as delaying Gradle execution relies on experimental GradleExecutionAware.
+          // if the API changes, we should be able to detect that in our tests when a new version comes out.
+          RunPluginVerifierTask.FailureLevel.EXPERIMENTAL_API_USAGES,
+          // we do not fail on deprecated API usages, as we want to support older versions where the API has
+          // not been deprecate yet, and the newer API not available
+          RunPluginVerifierTask.FailureLevel.DEPRECATED_API_USAGES,
+          // TODO: fix these
+          RunPluginVerifierTask.FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
+        )
+      )
+    )
+  }
 
-tasks.withType<PublishPluginTask> {
-  token.set(System.getenv("JETBRAINS_TOKEN")) // JETBRAINS_TOKEN env var available in CI
-}
-
-val ARROW_VERSION = "0.11.0"
-
-dependencies {
-  implementation("io.arrow-kt:arrow-core:$ARROW_VERSION")
-  implementation("io.arrow-kt:arrow-syntax:$ARROW_VERSION")
-  kapt("io.arrow-kt:arrow-meta:$ARROW_VERSION")
-}
+  publishPlugin {
+    token.set(System.getenv("JETBRAINS_TOKEN")) // JETBRAINS_TOKEN env var available in CI
+  }
 
 // See https://youtrack.jetbrains.com/issue/KTIJ-782
-tasks.buildSearchableOptions {
-  enabled = false
+  buildSearchableOptions {
+    enabled = false
+  }
 }
 
-tasks.test {
-  systemProperty("idea.force.use.core.classloader", "true")
-}
+// endregion
