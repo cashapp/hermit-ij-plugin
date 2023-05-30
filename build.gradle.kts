@@ -50,15 +50,6 @@ tasks {
 
 // region IJ Plugin setup
 
-// The latest supported versions. Note, these are updated automatically from update-major-versions.sh
-val IIC_RELEASE_VERSION = "231.8109.175"
-val IIC_EAP_VERSION = "232.6095.10"
-val GO_RELEASE_VERSION = "231.8109.46"
-val GO_EAP_VERSION = "232.6095.10"
-// The oldest supported versions.
-val IIC_FROM_VERSION = "222.4554.10"
-val GO_FROM_VERSION = "222.4554.12"
-
 data class Product(
   val releaseType: String, // identifier for this product
   val sdkVersion: String, // the version string passed to the intellij sdk gradle plugin
@@ -70,17 +61,17 @@ data class Product(
 val products = listOf(
   Product(
     releaseType = "release",
-    sdkVersion = IIC_RELEASE_VERSION,
-    goPluginVersion = IIC_RELEASE_VERSION,
-    intellijVersion = IIC_RELEASE_VERSION,
-    golandVersion = GO_RELEASE_VERSION,
+    sdkVersion = properties["IIC.release.version"] as String,
+    goPluginVersion = properties["IIC.release.version"] as String,
+    intellijVersion = properties["IIC.release.version"] as String,
+    golandVersion = properties["GO.release.version"] as String,
   ),
   Product(
     releaseType = "eap",
     sdkVersion = "LATEST-EAP-SNAPSHOT",
-    goPluginVersion = IIC_EAP_VERSION,
-    intellijVersion = IIC_EAP_VERSION,
-    golandVersion = GO_EAP_VERSION,
+    goPluginVersion = properties["IIC.eap.version"] as String,
+    intellijVersion = properties["IIC.eap.version"] as String,
+    golandVersion = properties["GO.eap.version"] as String,
   ),
 )
 val product = products.first { it.releaseType == (System.getenv("RELEASE_TYPE") ?: "release") }
@@ -109,7 +100,7 @@ tasks {
   }
 
   patchPluginXml {
-    sinceBuild.set(IIC_FROM_VERSION)
+    sinceBuild.set(project.properties["IIC.from.version"] as String)
     version.set(System.getenv("IJ_PLUGIN_VERSION")) // IJ_PLUGIN_VERSION env var available in CI
   }
 
@@ -118,8 +109,8 @@ tasks {
     // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
     ideVersions.set(
       listOf(
-        "IIC-$IIC_FROM_VERSION",
-        "GO-$GO_FROM_VERSION",
+        "IIC-${project.properties["IIC.from.version"] as String}",
+        "GO-${project.properties["GO.from.version"] as String}",
         "IIC-${product.intellijVersion}",
         "GO-${product.golandVersion}"
       )
