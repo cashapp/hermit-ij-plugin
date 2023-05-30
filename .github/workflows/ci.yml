@@ -8,6 +8,9 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        product: [release, eap]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
