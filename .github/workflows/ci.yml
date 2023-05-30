@@ -10,7 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        product: [release, eap]
+        release_type: [release, eap]
+    env:
+      RELEASE_TYPE: ${{ matrix.release_type }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
