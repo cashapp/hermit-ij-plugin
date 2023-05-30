@@ -14,8 +14,6 @@ plugins {
 }
 
 // region Build, dependencies
-val kotlin_version = "1.8.10"
-val ARROW_VERSION = "0.11.0"
 
 java {
   sourceCompatibility = JavaVersion.VERSION_17
@@ -26,13 +24,16 @@ repositories {
   mavenCentral()
 }
 
+val kotlinVersion = "1.8.10"
+val arrowVersion = "0.11.0"
+
 dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
-  implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
+  implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+  implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
-  implementation("io.arrow-kt:arrow-core:$ARROW_VERSION")
-  implementation("io.arrow-kt:arrow-syntax:$ARROW_VERSION")
-  kapt("io.arrow-kt:arrow-meta:$ARROW_VERSION")
+  implementation("io.arrow-kt:arrow-core:$arrowVersion")
+  implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
+  kapt("io.arrow-kt:arrow-meta:$arrowVersion")
 }
 
 tasks {
