@@ -11,6 +11,13 @@ latestRelease() {
   curl -s "${url}" | jq "[.[0]|.releases|.[]|select(.type==\"${releaseType}\")|.build][0]" | tr -d '"'
 }
 
+# Returns the latest go plugin version from https://plugins.jetbrains.com/api/plugins/9568.
+findLatestGoPluginVersion() {
+  majorVersion=$1
+  url="https://plugins.jetbrains.com/api/plugins/9568/updates?channel=&size=8"
+  curl -s "${url}" | jq "[.[]|select(.since|startswith(\"${majorVersion}\"))][0].version" | tr -d '"'
+}
+
 # Returns the latest IDE version used to build the plugin for the given IDE
 currentVersion() {
   typeCode=$1
@@ -21,7 +28,7 @@ currentVersion() {
 # Returns the major version for the given full version string
 majorVersion() {
   version=$1
-  echo "${version//^\([^.]*\).*/\1/}"
+  echo "${version}" | sed "s/^\([^.]*\).*/\1/"
 }
 
 # Sets the version for the given product type in the build file
@@ -46,6 +53,9 @@ updateIfNeeded() {
   if [ "$latestMajor" != "$currentMajor" ]; then
     echo "Upgrading ${typeCode} (${releaseType}) to ${latest}"
     setVersion "$typeCode" "$latest" "$releaseType"
+
+    goPluginVersion=$(findLatestGoPluginVersion "${latestMajor}")
+    sed -i.bak "s/^${typeCode}\.${releaseType}\.go_plugin\.version=.*$/${typeCode}.${releaseType}.go_plugin.version=${goPluginVersion}/g" gradle.properties
   else
     echo "No upgrade needed for ${typeCode} ${releaseType}"
   fi
@@ -55,3 +65,4 @@ updateIfNeeded IIC release
 updateIfNeeded IIC eap
 updateIfNeeded GO release
 updateIfNeeded GO eap
+
