@@ -99,7 +99,11 @@ tasks {
 
   patchPluginXml {
     sinceBuild.set(project.properties["IIC.from.version"] as String)
-    version.set(System.getenv("IJ_PLUGIN_VERSION")) // IJ_PLUGIN_VERSION env var available in CI
+    val versionSuffix = when(product.releaseType) {
+      "release" -> ""
+      else -> "-${product.releaseType}"
+    }
+    version.set("${System.getenv("IJ_PLUGIN_VERSION")}${versionSuffix}") // IJ_PLUGIN_VERSION env var available in CI
   }
 
   runPluginVerifier {
