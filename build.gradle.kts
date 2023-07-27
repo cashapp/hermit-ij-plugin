@@ -68,7 +68,8 @@ val products = listOf(
   ),
   Product(
     releaseType = "eap",
-    sdkVersion = "LATEST-EAP-SNAPSHOT",
+    // "<major version>-EAP-SNAPSHOT"
+    sdkVersion = "${(properties["IIC.eap.version"] as String).split(".")[0]}-EAP-SNAPSHOT",
     goPluginVersion = properties["IIC.eap.go_plugin.version"] as String,
     intellijVersion = properties["IIC.eap.version"] as String,
     golandVersion = properties["GO.eap.version"] as String,
@@ -84,7 +85,6 @@ intellij {
       "gradle",
       "java",
       "terminal",
-      // This version is in sync with the IJ Ultimate version, not the GoLand version.
       "org.jetbrains.plugins.go:${product.goPluginVersion}",
       // Needed by Go plugin. See https://github.com/JetBrains/gradle-intellij-plugin/issues/1056
       "org.intellij.intelliLang"
