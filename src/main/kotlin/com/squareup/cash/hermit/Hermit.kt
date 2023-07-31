@@ -33,12 +33,12 @@ object Hermit {
     private val HANDLER_EP_NAME: ExtensionPointName<HermitPropertyHandler> =
         ExtensionPointName("org.squareup.cash.hermit.idea-plugin.property-handler")
 
-    private val projects = ConcurrentHashMap<String, State>()
+    private val projects = ConcurrentHashMap<String, HermitState>()
 
-    operator fun invoke(project: Project): State {
-        val state = project.projectFilePath?.let { projects.getOrPut(it, { State(project) }) }
+    operator fun invoke(project: Project): HermitState {
+        val hermitState = project.projectFilePath?.let { projects.getOrPut(it) { HermitState(project) } }
         // projectFilePath can be null for the default project. Return an empty state for it.
-        return state ?: State(project)
+        return hermitState ?: HermitState(project)
     }
 
     fun remove(project: Project) {
@@ -46,10 +46,12 @@ object Hermit {
         project.projectFilePath?.let { projects.remove(it) }
     }
 
+    fun allProjects(): Collection<HermitState> = projects.values
+
     /**
      * State maintains the Hermit state of a single project
      */
-    class State(private val project: Project) {
+    class HermitState(val project: Project) {
         // Is this project a hermit enabled project?
         private var isHermitProject = false
         // Has the project been opened in the plugin?
