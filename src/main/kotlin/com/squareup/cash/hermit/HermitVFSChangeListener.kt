@@ -2,7 +2,6 @@ package com.squareup.cash.hermit
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectLocator
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
@@ -14,11 +13,17 @@ class HermitVFSChangeListener : BulkFileListener {
     override fun after(events: MutableList<out VFileEvent>) {
         val needsUpdating = HashMap<String, Project>()
         events.forEach {
-            val file = it.file
-            if (file != null) {
-                val project = ProjectLocator.getInstance().guessProjectForFile(file)
-                if (project != null && file != null && isHermitChange(project, file)) {
-                    needsUpdating[project.name] = project
+            it.file?.let { file ->
+                log.debug("Checking if file [${file.path}] is in projects " +
+                        "${Hermit.allProjects().map { state -> state.project.name }}")
+                Hermit.allProjects().forEach { state ->
+                    val project = state.project
+                    // The project might have been disposed since looking up Hermit.allProjects.
+                    log.debug("Project [${project.name}] is disposed: [${project.isDisposed}]")
+                    if (!project.isDisposed && isHermitChange(project, file)) {
+                        log.debug("Project [${project.name}] needs updating")
+                        needsUpdating[project.name] = project
+                    }
                 }
             }
         }

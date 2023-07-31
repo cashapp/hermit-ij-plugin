@@ -8,7 +8,7 @@ plugins {
   id("idea")
   id("java")
   kotlin("kapt") version "1.8.10"
-  id("org.jetbrains.intellij") version "1.13.3"
+  id("org.jetbrains.intellij") version "1.15.0"
   id("org.jetbrains.kotlin.jvm") version "1.8.10"
   id("org.jetbrains.kotlin.plugin.serialization") version "1.4.32"
 }
@@ -120,9 +120,6 @@ tasks {
     failureLevel.set(
       EnumSet.complementOf(
         EnumSet.of(
-          // skipping compatibility problems due to potential false positive with EAP v232:
-          // Method com.squareup.cash.hermit.HermitVFSChangeListener.after(List events) : void references an unresolved class com.intellij.openapi.project.ProjectLocator.Companion. This can lead to **NoSuchClassError** exception at runtime.
-          RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS,
           // skipping missing dependencies as com.intellij.java provided by IJ raises a false warning
           RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES,
           // skipping experimental API usage, as delaying Gradle execution relies on experimental GradleExecutionAware.
