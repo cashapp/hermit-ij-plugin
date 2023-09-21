@@ -5,6 +5,7 @@ import com.intellij.openapi.externalSystem.model.task.ExternalSystemTask
 import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskNotificationListener
 import com.intellij.openapi.project.Project
 import com.squareup.cash.hermit.Hermit
+import com.squareup.cash.hermit.Hermit.HermitStatus
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.plugins.gradle.service.execution.BuildLayoutParameters
 import org.jetbrains.plugins.gradle.service.execution.GradleExecutionAware
@@ -22,14 +23,16 @@ class HermitGradleExecutionAware: GradleExecutionAware {
     // If hermit is installing packages, pause the Gradle initialisation thread until the installation is done.
     // This prevents Gradle failing for invalid JDK if the underlying JDK is not available on the disk when the project
     // is opened.
-    if (Hermit(project).hermitStatus() == Hermit.HermitStatus.Installing) {
-      log.debug("waiting for 'hermit install' to be finished before continuing with Gradle preparation")
+    if (Hermit(project).hermitStatus() == HermitStatus.Installing ||
+      Hermit(project).hermitStatus() == HermitStatus.Configuring) {
+      log.debug("waiting for 'hermit install' and configuration to be finished before continuing with Gradle preparation")
 
       val start = System.currentTimeMillis()
       var waitMS = 10L
       while (true) {
         Thread.sleep(waitMS)
-        if (Hermit(project).hermitStatus() != Hermit.HermitStatus.Installing) {
+        if (Hermit(project).hermitStatus() != HermitStatus.Installing &&
+          Hermit(project).hermitStatus() != HermitStatus.Configuring) {
           break
         }
         if (waitMS < 500L) waitMS *= 2

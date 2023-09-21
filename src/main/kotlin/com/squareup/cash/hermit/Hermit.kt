@@ -26,6 +26,7 @@ object Hermit {
     enum class HermitStatus {
         Disabled, // Hermit is not in use
         Installing, // Installing Hermit packages to the system
+        Configuring, // Hermit packages are installed, but the IDE has not been configured yet
         Enabled, // Hermit has been started correctly
         Failed // Hermit initialisation has failed
     }
@@ -129,7 +130,7 @@ object Hermit {
                         if (!project.isDisposed) {
                             // We need to enable hermit in a Write-enabled thread
                             ApplicationManager.getApplication().invokeLater {
-                                setStatus(HermitStatus.Enabled)
+                                setStatus(HermitStatus.Configuring)
                                 Hermit(project).update()
                             }
                         }
@@ -141,6 +142,7 @@ object Hermit {
 
         private fun setStatus(newStatus: HermitStatus) {
             this.status = newStatus
+            log.debug("Status: $newStatus")
             this.refreshUI()
         }
 
@@ -157,7 +159,7 @@ object Hermit {
             this.clear()
             this.isHermitProject = project.hasHermit()
 
-            if (this.isHermitProject && this.status == HermitStatus.Enabled) {
+            if (this.isHermitProject) {
                 log.info(project.name + ": updating hermit status from disk")
                 when(val res =  project.hermitProperties().flatMap { prop -> project.hermitVersion().map { Pair(it, prop) }}) {
                     is Failure -> {
@@ -171,6 +173,7 @@ object Hermit {
                         log.info(project.name + ": updating hermit status succeeded: " + res.b.second.logString())
                         this.properties = res.b.second
                         res.b.second.packages.forEach { updateHandlers(it) }
+                        setStatus(HermitStatus.Enabled)
                     }
                 }
             }

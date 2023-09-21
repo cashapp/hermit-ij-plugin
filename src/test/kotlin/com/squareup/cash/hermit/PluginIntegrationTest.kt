@@ -169,6 +169,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         TestCase.assertNull(widget)
     }
 
+    // Doesn't run locally?
     @Test fun `test changing a JDK via real hermit updates the project JDK correctly`() {
         val hermit = RealHermit(projectDirOrFile.parent, listOf("openjdk-11.0.10_9"))
         withHermit(hermit)
@@ -176,19 +177,19 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         Hermit(project).enable()
         waitAppThreads()
 
-        val sdk1 = ProjectRootManager.getInstance(project).projectSdk!!
-        TestCase.assertEquals("Hermit (openjdk-11.0.10_9)", sdk1.name)
+        val sdk1 = ProjectRootManager.getInstance(project).projectSdk
+        TestCase.assertEquals("Hermit (openjdk-11.0.10_9)", sdk1?.name)
 
-        hermit.install("openjdk@latest")
+        hermit.install("openjdk-17.0.7_7")
         updateVFS()
         waitAppThreads()
 
-        val sdk2 = ProjectRootManager.getInstance(project).projectSdk!!
-        TestCase.assertEquals("Hermit (openjdk@latest)", sdk2.name)
+        val sdk2 = ProjectRootManager.getInstance(project).projectSdk
+        TestCase.assertEquals("Hermit (openjdk-17.0.7_7)", sdk2?.name)
 
         ApplicationManager.getApplication()?.runWriteAction {
-            ProjectJdkTable.getInstance().removeJdk(sdk2)
-            ProjectJdkTable.getInstance().removeJdk(sdk1)
+            ProjectJdkTable.getInstance().removeJdk(sdk2!!)
+            ProjectJdkTable.getInstance().removeJdk(sdk1!!)
         }
     }
 }
