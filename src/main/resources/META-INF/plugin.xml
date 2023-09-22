@@ -48,6 +48,5 @@
 
     <depends optional="true" config-file="idea.xml">com.intellij.java</depends>
     <depends optional="true" config-file="gradle.xml">com.intellij.gradle</depends>
-    <depends optional="true" config-file="terminal.xml">org.jetbrains.plugins.terminal</depends>
     <depends optional="true" config-file="goland.xml">org.jetbrains.plugins.go</depends>
 </idea-plugin>
