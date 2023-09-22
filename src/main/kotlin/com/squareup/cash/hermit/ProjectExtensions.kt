@@ -110,8 +110,9 @@ private fun hermitPackages(js: JsonElement): Result<List<HermitPackage>> {
                 val root = obj.field("Root").flatMap { it.asPrimitive() }.map { it.nullableString() }.bind()
                 val type = when(name) {
                     "go" -> PackageType.Go
-                    "openjdk" -> PackageType.JDK
+                    "corretto" -> PackageType.JDK
                     "graalvm" -> PackageType.JDK
+                    "openjdk" -> PackageType.JDK
                     "gradle" -> PackageType.Gradle
                     else -> PackageType.Unknown
                 }
