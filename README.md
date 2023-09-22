@@ -28,6 +28,10 @@ This generates a zip file at
 To install the package, go to the plugin preferences in your IDE, and select "Install plugin from disk"
 If you then select the zip file generated above and restart your IDE, the plugin should be ready.
 
+## Developing locally
+
+You can use the `runIde` task to start an IDE with the plugin installed. You can also run that in debug mode.
+
 ---
 
 Copyright 2021 Square, Inc.
