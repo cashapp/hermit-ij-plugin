@@ -129,8 +129,8 @@ object Hermit {
                         if (!project.isDisposed) {
                             // We need to enable hermit in a Write-enabled thread
                             ApplicationManager.getApplication().invokeLater {
-                                setStatus(HermitStatus.Enabled)
                                 Hermit(project).update()
+                                setStatus(HermitStatus.Enabled)
                             }
                         }
                     }
@@ -157,7 +157,7 @@ object Hermit {
             this.clear()
             this.isHermitProject = project.hasHermit()
 
-            if (this.isHermitProject && this.status == HermitStatus.Enabled) {
+            if (this.isHermitProject) {
                 log.info(project.name + ": updating hermit status from disk")
                 when(val res =  project.hermitProperties().flatMap { prop -> project.hermitVersion().map { Pair(it, prop) }}) {
                     is Failure -> {
