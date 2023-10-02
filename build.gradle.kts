@@ -85,6 +85,7 @@ intellij {
       "gradle",
       "java",
       "terminal",
+      "com.intellij.properties",
       "org.jetbrains.plugins.go:${product.goPluginVersion}",
       // Needed by Go plugin. See https://github.com/JetBrains/gradle-intellij-plugin/issues/1056
       "org.intellij.intelliLang"
