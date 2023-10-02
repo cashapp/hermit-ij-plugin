@@ -46,6 +46,7 @@
         <extensionPoint name="property-handler" interface="com.squareup.cash.hermit.HermitPropertyHandler" />
     </extensionPoints>
 
+    <depends optional="true" config-file="properties.xml">com.intellij.properties</depends>
     <depends optional="true" config-file="idea.xml">com.intellij.java</depends>
     <depends optional="true" config-file="gradle.xml">com.intellij.gradle</depends>
     <depends optional="true" config-file="goland.xml">org.jetbrains.plugins.go</depends>
