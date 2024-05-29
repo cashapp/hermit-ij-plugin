@@ -8,9 +8,9 @@ plugins {
   id("idea")
   id("java")
   kotlin("kapt") version "1.8.10"
-  id("org.jetbrains.intellij") version "1.15.0"
-  id("org.jetbrains.kotlin.jvm") version "1.8.10"
-  id("org.jetbrains.kotlin.plugin.serialization") version "1.4.32"
+  id("org.jetbrains.intellij") version "1.17.3"
+  id("org.jetbrains.kotlin.jvm") version "1.9.24"
+  id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
 
 // region Build, dependencies
@@ -24,7 +24,7 @@ repositories {
   mavenCentral()
 }
 
-val kotlinVersion = "1.8.10"
+val kotlinVersion = "1.9.24"
 val arrowVersion = "0.11.0"
 
 dependencies {
@@ -39,7 +39,7 @@ dependencies {
 tasks {
   compileKotlin {
     kotlinOptions.jvmTarget = "11"
-    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=enable")
+    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=all")
   }
 
   test {
