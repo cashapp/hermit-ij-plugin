@@ -21,4 +21,4 @@ jobs:
       - name: Test
         run: gradle clean test --info
       - name: Plugin verification
-        run: gradle clean runPluginVerifier
+        run: gradle clean verifyPlugin
