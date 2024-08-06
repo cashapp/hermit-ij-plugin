@@ -1,15 +1,16 @@
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask
-import java.util.EnumSet
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import kotlin.math.sin
 
 group = "com.squareup.cash.hermit"
 version = project.properties["version"] ?: "1.0-SNAPSHOT"
 
 plugins {
-  id("idea")
   id("java")
-  kotlin("kapt") version "1.8.10"
-  id("org.jetbrains.intellij") version "1.15.0"
-  id("org.jetbrains.kotlin.jvm") version "1.8.10"
+  kotlin("kapt") version "1.9.25"
+  id("org.jetbrains.intellij.platform") version "2.0.0"
+
+  id("org.jetbrains.kotlin.jvm") version "1.9.25"
   id("org.jetbrains.kotlin.plugin.serialization") version "1.4.32"
 }
 
@@ -17,38 +18,15 @@ plugins {
 
 java {
   sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
   mavenCentral()
-}
-
-val kotlinVersion = "1.8.10"
-val arrowVersion = "0.11.0"
-
-dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-  implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
-  implementation("io.arrow-kt:arrow-core:$arrowVersion")
-  implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
-  kapt("io.arrow-kt:arrow-meta:$arrowVersion")
-}
-
-tasks {
-  compileKotlin {
-    kotlinOptions.jvmTarget = "11"
-    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=enable")
-  }
-
-  test {
-    systemProperty("idea.force.use.core.classloader", "true")
+  intellijPlatform {
+    defaultRepositories()
   }
 }
-// endregion
-
-// region IJ Plugin setup
 
 data class Product(
   val releaseType: String, // identifier for this product
@@ -77,73 +55,102 @@ val products = listOf(
 )
 val product = products.first { it.releaseType == (System.getenv("RELEASE_TYPE") ?: "release") }
 
-intellij {
-  version.set(product.sdkVersion)
-  type.set("IU")
-  plugins.set(
-    listOf(
-      "gradle",
-      "java",
-      "terminal",
+val verifyOldVersions = System.getenv("VERIFY_VERSIONS") == "old"
+
+val kotlinVersion = "1.9.25"
+val arrowVersion = "0.11.0"
+
+dependencies {
+  intellijPlatform {
+    intellijIdeaUltimate(product.sdkVersion, useInstaller = false)
+    pluginVerifier("1.371")
+    plugins(
+      "org.jetbrains.plugins.go:${product.goPluginVersion}"
+    )
+    bundledPlugins(
+      "com.intellij.gradle",
+      "com.intellij.java",
       "com.intellij.properties",
-      "org.jetbrains.plugins.go:${product.goPluginVersion}",
       // Needed by Go plugin. See https://github.com/JetBrains/gradle-intellij-plugin/issues/1056
       "org.intellij.intelliLang"
     )
-  )
-}
-tasks {
-  runIde {
-    // Uncomment this, and set your path accordingly, if you want to debug on GoLand
-    // ideDirectory "/Users/juho/Library/Application Support/JetBrains/Toolbox/apps/Goland/ch-0/203.6682.164/GoLand.app/Contents"
+    testFramework(TestFrameworkType.Bundled, product.sdkVersion)
   }
 
+  implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+  implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+  implementation("io.arrow-kt:arrow-core:$arrowVersion")
+  implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
+  kapt("io.arrow-kt:arrow-meta:$arrowVersion")
+
+  testImplementation("junit:junit:4.13.2")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
+}
+
+tasks {
+  compileKotlin {
+    kotlinOptions.jvmTarget = "17"
+    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
+  }
+
+  test {
+    systemProperty("idea.force.use.core.classloader", "true")
+  }
+}
+
+intellijPlatform {
+  version = version
+  projectName = project.name
+
+  instrumentCode = false // We don't need to scan codebase for jetbrains annotations
+
+  //type.set("IU")
+
+  pluginVerification {
+    // These need to match the versions from
+    // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
+    if (verifyOldVersions) {
+      ides {
+        select {
+          types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
+          sinceBuild = project.properties["IIC.from.version"] as String
+          untilBuild = project.properties["IIC.from.version"] as String
+        }
+        select {
+          types = listOf(IntelliJPlatformType.GoLand)
+          sinceBuild = project.properties["GO.from.version"] as String
+          untilBuild = project.properties["GO.from.version"] as String
+        }
+      }
+    } else {
+      ides {
+        select {
+          types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
+          sinceBuild = product.intellijVersion
+          untilBuild = product.intellijVersion
+        }
+        select {
+          types = listOf(IntelliJPlatformType.GoLand)
+          sinceBuild = product.golandVersion
+          untilBuild = product.golandVersion
+        }
+      }
+    }
+  }
+}
+
+tasks {
   patchPluginXml {
     sinceBuild.set(project.properties["IIC.from.version"] as String)
     val versionSuffix = when(product.releaseType) {
       "release" -> ""
       else -> "-${product.releaseType}"
     }
-    version.set("${System.getenv("IJ_PLUGIN_VERSION")}${versionSuffix}") // IJ_PLUGIN_VERSION env var available in CI
-  }
-
-  runPluginVerifier {
-    // These need to match the versions from
-    // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
-    ideVersions.set(
-      listOf(
-        "IIC-${project.properties["IIC.from.version"] as String}",
-        "GO-${project.properties["GO.from.version"] as String}",
-        "IIC-${product.intellijVersion}",
-        "GO-${product.golandVersion}"
-      )
-    )
-    failureLevel.set(
-      EnumSet.complementOf(
-        EnumSet.of(
-          // skipping missing dependencies as com.intellij.java provided by IJ raises a false warning
-          RunPluginVerifierTask.FailureLevel.MISSING_DEPENDENCIES,
-          // skipping experimental API usage, as delaying Gradle execution relies on experimental GradleExecutionAware.
-          // if the API changes, we should be able to detect that in our tests when a new version comes out.
-          RunPluginVerifierTask.FailureLevel.EXPERIMENTAL_API_USAGES,
-          // we do not fail on deprecated API usages, as we want to support older versions where the API has
-          // not been deprecate yet, and the newer API not available
-          RunPluginVerifierTask.FailureLevel.DEPRECATED_API_USAGES,
-          // TODO: fix these
-          RunPluginVerifierTask.FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
-        )
-      )
-    )
+    version = "${System.getenv("IJ_PLUGIN_VERSION")}${versionSuffix}" // IJ_PLUGIN_VERSION env var available in CI
   }
 
   publishPlugin {
     token.set(System.getenv("JETBRAINS_TOKEN")) // JETBRAINS_TOKEN env var available in CI
   }
-
-// See https://youtrack.jetbrains.com/issue/KTIJ-782
-  buildSearchableOptions {
-    enabled = false
-  }
 }
-
-// endregion

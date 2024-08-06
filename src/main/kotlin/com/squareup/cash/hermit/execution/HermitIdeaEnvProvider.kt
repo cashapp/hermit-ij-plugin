@@ -14,10 +14,12 @@ class HermitIdeaEnvProvider : RunConfigurationExtension() {
         return Hermit(configuration.project).hasHermit()
     }
 
-    override fun <T : RunConfigurationBase<*>?> updateJavaParameters(configuration: T, params: JavaParameters, settings: RunnerSettings?) {
-        val project = configuration?.getProject()
-        if (project != null) {
-            params.env = Hermit(project).environment().patch(params.env)
-        }
+    override fun <T : RunConfigurationBase<*>?> updateJavaParameters(
+        configuration: T & Any,
+        params: JavaParameters,
+        settings: RunnerSettings?
+    ) {
+        val project = configuration.project
+        params.env = Hermit(project).environment().patch(params.env)
     }
 }
