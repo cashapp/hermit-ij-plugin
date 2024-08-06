@@ -20,5 +20,32 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Test
         run: gradle clean test --info
+  verify_new:
+    name: Verify Plugin Against Latest Releases
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        release_type: [ release, eap ]
+    env:
+      RELEASE_TYPE: ${{ matrix.release_type }}
+      VERIFY_VERSIONS: new
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
+      - name: Plugin verification
+        run: gradle clean verifyPlugin
+  verify_old:
+    name: Verify Plugin Against Old Releases
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TYPE: release
+      VERIFY_VERSIONS: old
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Init Hermit
+        run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Plugin verification
         run: gradle clean verifyPlugin

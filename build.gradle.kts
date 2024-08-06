@@ -55,6 +55,8 @@ val products = listOf(
 )
 val product = products.first { it.releaseType == (System.getenv("RELEASE_TYPE") ?: "release") }
 
+val verifyOldVersions = System.getenv("VERIFY_VERSIONS") == "old"
+
 val kotlinVersion = "1.9.25"
 val arrowVersion = "0.11.0"
 
@@ -108,26 +110,31 @@ intellijPlatform {
   pluginVerification {
     // These need to match the versions from
     // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
-    ides {
-      select {
-        types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
-        sinceBuild = project.properties["IIC.from.version"] as String
-        untilBuild = project.properties["IIC.from.version"] as String
+    if (verifyOldVersions) {
+      ides {
+        select {
+          types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
+          sinceBuild = project.properties["IIC.from.version"] as String
+          untilBuild = project.properties["IIC.from.version"] as String
+        }
+        select {
+          types = listOf(IntelliJPlatformType.GoLand)
+          sinceBuild = project.properties["GO.from.version"] as String
+          untilBuild = project.properties["GO.from.version"] as String
+        }
       }
-      select {
-        types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
-        sinceBuild = product.intellijVersion
-        untilBuild = product.intellijVersion
-      }
-      select {
-        types = listOf(IntelliJPlatformType.GoLand)
-        sinceBuild = project.properties["GO.from.version"] as String
-        untilBuild = project.properties["GO.from.version"] as String
-      }
-      select {
-        types = listOf(IntelliJPlatformType.GoLand)
-        sinceBuild = product.golandVersion
-        untilBuild = product.golandVersion
+    } else {
+      ides {
+        select {
+          types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
+          sinceBuild = product.intellijVersion
+          untilBuild = product.intellijVersion
+        }
+        select {
+          types = listOf(IntelliJPlatformType.GoLand)
+          sinceBuild = product.golandVersion
+          untilBuild = product.golandVersion
+        }
       }
     }
   }
