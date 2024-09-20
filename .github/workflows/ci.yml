@@ -19,9 +19,11 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Test
-        run: gradle clean test --stacktrace
+        run: |
+          gradle clean test --stacktrace
       - name: Get Test report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: test-reports
           path: |
