@@ -20,6 +20,12 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Test
         run: gradle clean test --stacktrace
+      - name: Get Test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            build/reports/tests/**/*
   verify_new:
     name: Verify Plugin Against Latest Releases
     runs-on: ubuntu-latest
