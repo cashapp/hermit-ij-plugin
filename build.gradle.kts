@@ -79,7 +79,7 @@ dependencies {
 
   implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
   implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2")
   implementation("io.arrow-kt:arrow-core:$arrowVersion")
   implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
   kapt("io.arrow-kt:arrow-meta:$arrowVersion")
