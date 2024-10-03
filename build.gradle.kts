@@ -8,10 +8,10 @@ version = project.properties["version"] ?: "1.0-SNAPSHOT"
 plugins {
   id("java")
   kotlin("kapt") version "1.9.25"
-  id("org.jetbrains.intellij.platform") version "2.0.0"
+  id("org.jetbrains.intellij.platform") version "2.0.1"
 
   id("org.jetbrains.kotlin.jvm") version "1.9.25"
-  id("org.jetbrains.kotlin.plugin.serialization") version "1.4.32"
+  id("org.jetbrains.kotlin.plugin.serialization") version "1.9.25"
 }
 
 // region Build, dependencies
@@ -63,7 +63,7 @@ val arrowVersion = "0.11.0"
 dependencies {
   intellijPlatform {
     intellijIdeaUltimate(product.sdkVersion, useInstaller = false)
-    pluginVerifier("1.371")
+    pluginVerifier("1.378")
     plugins(
       "org.jetbrains.plugins.go:${product.goPluginVersion}"
     )
@@ -79,7 +79,7 @@ dependencies {
 
   implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
   implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2")
   implementation("io.arrow-kt:arrow-core:$arrowVersion")
   implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
   kapt("io.arrow-kt:arrow-meta:$arrowVersion")
