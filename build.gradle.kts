@@ -7,11 +7,11 @@ version = project.properties["version"] ?: "1.0-SNAPSHOT"
 
 plugins {
   id("java")
-  kotlin("kapt") version "1.9.25"
+  kotlin("kapt") version "2.0.21"
   id("org.jetbrains.intellij.platform") version "2.0.1"
 
-  id("org.jetbrains.kotlin.jvm") version "1.9.25"
-  id("org.jetbrains.kotlin.plugin.serialization") version "1.9.25"
+  id("org.jetbrains.kotlin.jvm") version "2.0.21"
+  id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
 }
 
 // region Build, dependencies
@@ -57,7 +57,7 @@ val product = products.first { it.releaseType == (System.getenv("RELEASE_TYPE") 
 
 val verifyOldVersions = System.getenv("VERIFY_VERSIONS") == "old"
 
-val kotlinVersion = "1.9.25"
+val kotlinVersion = "2.0.21"
 val arrowVersion = "0.11.0"
 
 dependencies {
@@ -88,12 +88,14 @@ dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
 }
 
-tasks {
-  compileKotlin {
-    kotlinOptions.jvmTarget = "17"
-    kotlinOptions.freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
+kotlin {
+  compilerOptions {
+    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
   }
+}
 
+tasks {
   test {
     systemProperty("idea.force.use.core.classloader", "true")
   }
