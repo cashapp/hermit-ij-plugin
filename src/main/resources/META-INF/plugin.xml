@@ -19,7 +19,6 @@
 
     <projectListeners>
         <listener class="com.squareup.cash.hermit.HermitVFSChangeListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener" />
-        <listener class="com.squareup.cash.hermit.HermitProjectManagerListener" topic="com.intellij.openapi.project.ProjectManagerListener" />
     </projectListeners>
 
     <applicationListeners>
