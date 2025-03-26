@@ -17,7 +17,9 @@ All Hermit changes are automatically reflected in the IDE.
 
 To build the plugin, run
 
-    gradle buildPlugin
+```sh
+./gradlew buildPlugin
+```
 
 This generates a zip file at
 
