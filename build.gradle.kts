@@ -8,7 +8,7 @@ version = project.properties["version"] ?: "1.0-SNAPSHOT"
 plugins {
   id("java")
   kotlin("kapt") version "2.0.21"
-  id("org.jetbrains.intellij.platform") version "2.0.1"
+  id("org.jetbrains.intellij.platform") version "2.3.0"
 
   id("org.jetbrains.kotlin.jvm") version "2.0.21"
   id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
