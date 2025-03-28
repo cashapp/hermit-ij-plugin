@@ -19,7 +19,6 @@
 
     <projectListeners>
         <listener class="com.squareup.cash.hermit.HermitVFSChangeListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener" />
-        <listener class="com.squareup.cash.hermit.HermitProjectManagerListener" topic="com.intellij.openapi.project.ProjectManagerListener" />
     </projectListeners>
 
     <applicationListeners>
@@ -40,6 +39,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolsCustomizer implementation="com.squareup.cash.hermit.execution.HermitToolsCustomiser" />
         <statusBarWidgetFactory id="HermitStatusBarWidgetFactory" implementation="com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidgetFactory"/>
+        <postStartupActivity implementation="com.squareup.cash.hermit.HermitProjectStartupActivity"/>
     </extensions>
 
     <extensionPoints>
