@@ -8,6 +8,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.extensions.ExtensionPointName
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.openapi.wm.impl.status.widget.StatusBarWidgetsManager
 import com.intellij.util.ThreeState
@@ -96,7 +97,7 @@ object Hermit {
                     }
                 }
             } else {
-                log.info(project.name + ": no hermit detected for " + project.name)
+                log.info(project.name + ": no hermit detected for " + project.name + " (hermit not found in bin directory under " + project.guessProjectDir()?.path + ")")
                 setStatus(HermitStatus.Disabled)
             }
             this.refreshUI()
