@@ -98,6 +98,7 @@ kotlin {
 tasks {
   test {
     systemProperty("idea.force.use.core.classloader", "true")
+    maxHeapSize = "2g"
   }
 }
 
