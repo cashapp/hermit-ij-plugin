@@ -7,11 +7,11 @@ version = project.properties["version"] ?: "1.0-SNAPSHOT"
 
 plugins {
   id("java")
-  kotlin("kapt") version "2.0.21"
-  id("org.jetbrains.intellij.platform") version "2.3.0"
+  kotlin("kapt") version "2.2.0"
+  id("org.jetbrains.intellij.platform") version "2.7.0"
 
-  id("org.jetbrains.kotlin.jvm") version "2.0.21"
-  id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
+  id("org.jetbrains.kotlin.jvm") version "2.2.0"
+  id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
 }
 
 // region Build, dependencies
@@ -57,7 +57,7 @@ val product = products.first { it.releaseType == (System.getenv("RELEASE_TYPE") 
 
 val verifyOldVersions = System.getenv("VERIFY_VERSIONS") == "old"
 
-val kotlinVersion = "2.0.21"
+val kotlinVersion = "2.2.0"
 val arrowVersion = "0.11.0"
 
 dependencies {
@@ -98,6 +98,7 @@ kotlin {
 tasks {
   test {
     systemProperty("idea.force.use.core.classloader", "true")
+    maxHeapSize = "2g"
   }
 }
 
