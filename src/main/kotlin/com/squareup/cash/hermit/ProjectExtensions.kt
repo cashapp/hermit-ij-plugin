@@ -164,7 +164,7 @@ fun Project.isTrustedForHermit(): ThreeState {
             return ThreeState.UNSURE
         }
 
-        return ThreeState.fromBoolean(result)
+        return if (result) ThreeState.YES else ThreeState.NO
     } catch (e: Exception) {
         when(e) {
             is ClassNotFoundException,
