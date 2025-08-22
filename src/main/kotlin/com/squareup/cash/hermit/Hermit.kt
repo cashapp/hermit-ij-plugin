@@ -207,6 +207,23 @@ object Hermit {
             HANDLER_EP_NAME.extensions.forEach {
                 it.handle(hermitPackage, project)
             }
+            
+            // Fallback for Go packages when the Go plugin handler is not registered
+            // This can happen when Go plugin dependencies are not properly loaded
+            if (hermitPackage.type == PackageType.Go) {
+                val hasGoHandler = HANDLER_EP_NAME.extensions.any { 
+                    it.javaClass.simpleName == "HermitGoEnvUpdater" 
+                }
+                if (!hasGoHandler) {
+                    try {
+                        val updaterClass = Class.forName("com.squareup.cash.hermit.goland.HermitGoEnvUpdater")
+                        val updater = updaterClass.getDeclaredConstructor().newInstance() as HermitPropertyHandler
+                        updater.handle(hermitPackage, project)
+                    } catch (e: Exception) {
+                        log.debug("Go plugin handler not available: ${e.message}")
+                    }
+                }
+            }
         }
     }
 
