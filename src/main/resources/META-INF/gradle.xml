@@ -3,9 +3,12 @@
         <executionEnvironmentProvider implementation="com.squareup.cash.hermit.execution.HermitGradleAppEnvProvider" order="first" />
     </extensions>
 
+    <!-- Temporarily disabled due to experimental API compatibility issues in IntelliJ Platform Gradle Plugin 2.7.2+ -->
+    <!-- 
     <extensions defaultExtensionNs="com.intellij">
         <externalExecutionAware id="hermit-gradle" key="GRADLE" implementationClass="com.squareup.cash.hermit.gradle.HermitGradleExecutionAware" order="first"/>
     </extensions>
+    -->
 
     <extensions defaultExtensionNs="org.squareup.cash.hermit.idea-plugin">
         <property-handler implementation="com.squareup.cash.hermit.gradle.GradleConfigUpdater" />
