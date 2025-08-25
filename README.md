@@ -3,6 +3,8 @@
 This IntelliJ plugin provides configuration from the project's Hermit environment to the IDE. 
 It is supported both in Idea and GoLand.
 
+bump to build
+
 ## Features
 
 This plugin loads environment variables automatically from a Hermit environment if one exists at the root of the project.
