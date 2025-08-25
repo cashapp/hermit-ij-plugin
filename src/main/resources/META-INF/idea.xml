@@ -1,7 +1,10 @@
 <idea-plugin>
+    <!-- Temporarily disabled due to GoLand compatibility issues in plugin verification -->
+    <!--
     <extensions defaultExtensionNs="com.intellij">
         <runConfigurationExtension implementation="com.squareup.cash.hermit.execution.HermitIdeaEnvProvider" order="first" />
     </extensions>
+    -->
 
     <extensions defaultExtensionNs="org.squareup.cash.hermit.idea-plugin">
         <property-handler implementation="com.squareup.cash.hermit.idea.HermitJdkUpdater" />

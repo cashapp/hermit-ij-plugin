@@ -12,4 +12,17 @@ class HermitDynamicPluginListener : DynamicPluginListener {
             projects.forEach { Hermit(it).open() }
         }
     }
+    
+    // Explicitly implement all abstract methods to prevent compiler from generating synthetic calls
+    override fun checkUnloadPlugin(pluginDescriptor: IdeaPluginDescriptor) {
+        // No-op implementation for compatibility
+    }
+    
+    override fun pluginsLoaded() {
+        // No-op implementation for compatibility  
+    }
+    
+    override fun beforePluginsLoaded() {
+        // No-op implementation for compatibility
+    }
 }
