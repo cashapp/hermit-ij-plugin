@@ -5,7 +5,6 @@ import com.intellij.openapi.externalSystem.model.task.ExternalSystemTask
 import com.intellij.openapi.externalSystem.model.task.ExternalSystemTaskNotificationListener
 import com.intellij.openapi.project.Project
 import com.squareup.cash.hermit.Hermit
-import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.plugins.gradle.service.execution.BuildLayoutParameters
 import org.jetbrains.plugins.gradle.service.execution.GradleExecutionAware
 
@@ -42,24 +41,6 @@ class HermitGradleExecutionAware: GradleExecutionAware {
     }
   }
 
-  @ApiStatus.OverrideOnly
-  override fun getBuildLayoutParameters(project: Project, projectPath: java.nio.file.Path): BuildLayoutParameters? {
-    return null
-  }
-
-  // Older API with String parameter - keep for compatibility
-  override fun getBuildLayoutParameters(project: Project, projectPath: String): BuildLayoutParameters? = null
-
-  override fun getDefaultBuildLayoutParameters(project: Project): BuildLayoutParameters? = null
-
-  // Newer API with Path parameter
-  @ApiStatus.OverrideOnly  
-  override fun isGradleInstallationHomeDir(project: Project, homePath: java.nio.file.Path): Boolean {
-    return false
-  }
-
-  // Older API with String parameter - keep for compatibility
-  override fun isGradleInstallationHomeDir(project: Project, homePath: String): Boolean = false
 
   companion object {
     const val TIMEOUT_MS = 120000

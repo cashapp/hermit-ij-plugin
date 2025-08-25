@@ -12,12 +12,4 @@ class HermitDynamicPluginListener : DynamicPluginListener {
             projects.forEach { Hermit(it).open() }
         }
     }
-
-    override fun pluginsLoaded() {
-        // Empty implementation for compatibility
-    }
-    
-    override fun beforePluginsLoaded() {
-        // Empty implementation for compatibility  
-    }
 }
