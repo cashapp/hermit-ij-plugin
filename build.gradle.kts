@@ -55,6 +55,15 @@ val products = listOf(
 )
 val product = products.first { it.releaseType == (System.getenv("RELEASE_TYPE") ?: "release") }
 
+// Debug logging to see what values are being used
+println("=== VERSION DEBUG INFO ===")
+println("RELEASE_TYPE: ${System.getenv("RELEASE_TYPE") ?: "release"}")
+println("Selected product: ${product.releaseType}")
+println("Product.golandVersion: ${product.golandVersion}")
+println("GO.eap.version from properties: ${project.properties["GO.eap.version"]}")
+println("GO.release.version from properties: ${project.properties["GO.release.version"]}")
+println("==========================")
+
 val verifyOldVersions = System.getenv("VERIFY_VERSIONS") == "old"
 
 val kotlinVersion = "2.2.0"
@@ -69,6 +78,10 @@ dependencies {
     plugins(
       "org.jetbrains.plugins.go:${product.goPluginVersion}"
     )
+    println("=== DEPENDENCY DEBUG ===")
+    println("SDK Version: ${product.sdkVersion}")
+    println("Go Plugin Version: ${product.goPluginVersion}")
+    println("=======================")
     bundledPlugins(
       "com.intellij.gradle",
       "com.intellij.java",
@@ -102,6 +115,36 @@ tasks {
     systemProperty("idea.force.use.core.classloader", "true")
     maxHeapSize = "2g"
   }
+  
+  verifyPlugin {
+    doFirst {
+      println("=== VERIFY PLUGIN TASK DEBUG ===")
+      println("Archive file: ${archiveFile.get()}")
+      println("Failure level: ${failureLevel.get()}")
+      println("===============================")
+    }
+  }
+  
+  register("debugDependencies") {
+    doLast {
+      println("=== RESOLVED DEPENDENCIES DEBUG ===")
+      configurations.forEach { config ->
+        if (config.name.contains("intellij", ignoreCase = true)) {
+          println("Configuration: ${config.name}")
+          try {
+            config.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
+              if (artifact.name.contains("goland", ignoreCase = true) || artifact.name.contains("252.23892")) {
+                println("  GoLand artifact: ${artifact.name} - ${artifact.moduleVersion}")
+              }
+            }
+          } catch (e: Exception) {
+            println("  Cannot resolve configuration: ${e.message}")
+          }
+        }
+      }
+      println("=================================")
+    }
+  }
 }
 
 intellijPlatform {
@@ -113,6 +156,10 @@ intellijPlatform {
   //type.set("IU")
 
   pluginVerification {
+    failureLevel = listOf(
+      org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS,
+      org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel.INVALID_PLUGIN
+    )
     // These need to match the versions from
     // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
     if (verifyOldVersions) {
@@ -140,6 +187,9 @@ intellijPlatform {
           sinceBuild = product.golandVersion
           untilBuild = product.golandVersion
         }
+        println("=== GOLAND VERIFICATION CONFIG ===")
+        println("GoLand sinceBuild/untilBuild: ${product.golandVersion}")
+        println("==================================")
       }
     }
   }
