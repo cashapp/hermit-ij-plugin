@@ -65,7 +65,8 @@ dependencies {
     intellijIdeaUltimate(product.sdkVersion) {
       useInstaller = false
     }
-    pluginVerifier("1.378")
+    pluginVerifier("1.394")
+    
     plugins(
       "org.jetbrains.plugins.go:${product.goPluginVersion}"
     )
