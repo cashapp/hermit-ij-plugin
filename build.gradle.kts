@@ -66,7 +66,7 @@ dependencies {
       useInstaller = false
     }
     pluginVerifier("1.394")
-    
+
     plugins(
       "org.jetbrains.plugins.go:${product.goPluginVersion}"
     )

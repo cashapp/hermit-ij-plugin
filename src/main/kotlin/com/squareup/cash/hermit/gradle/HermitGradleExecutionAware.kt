@@ -47,8 +47,6 @@ class HermitGradleExecutionAware: GradleExecutionAware {
     return null
   }
 
-  // Older API with String parameter - keep for compatibility
-  override fun getBuildLayoutParameters(project: Project, projectPath: String): BuildLayoutParameters? = null
 
   override fun getDefaultBuildLayoutParameters(project: Project): BuildLayoutParameters? = null
 
@@ -58,8 +56,6 @@ class HermitGradleExecutionAware: GradleExecutionAware {
     return false
   }
 
-  // Older API with String parameter - keep for compatibility
-  override fun isGradleInstallationHomeDir(project: Project, homePath: String): Boolean = false
 
   companion object {
     const val TIMEOUT_MS = 120000
