@@ -154,5 +154,14 @@ tasks {
 
   publishPlugin {
     token.set(System.getenv("JETBRAINS_TOKEN")) // JETBRAINS_TOKEN env var available in CI
+
+    // Configure channel based on release type
+    channels.set(listOf(
+      when(product.releaseType) {
+        "release" -> "default"
+        "eap" -> "eap"
+        else -> "default"
+      }
+    ))
   }
 }
