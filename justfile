@@ -6,6 +6,26 @@ default:
 release:
     #!/usr/bin/env bash
     set -euo pipefail
+
+    # Ensure we're on main
+    branch=$(git branch --show-current)
+    if [[ "$branch" != "main" ]]; then
+        echo "Error: Must be on main branch (currently on '$branch')"
+        exit 1
+    fi
+
+    # Ensure main is up to date
+    git fetch origin main
+    local_sha=$(git rev-parse HEAD)
+    remote_sha=$(git rev-parse origin/main)
+    if [[ "$local_sha" != "$remote_sha" ]]; then
+        echo "Error: Local main is not up to date with origin/main"
+        echo "  Local:  $local_sha"
+        echo "  Remote: $remote_sha"
+        echo "Run 'git pull' first"
+        exit 1
+    fi
+
     latest=$(git tag --sort=-v:refname | head -1)
     echo "Latest version: $latest"
 
