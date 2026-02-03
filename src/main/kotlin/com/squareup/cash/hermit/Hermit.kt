@@ -160,20 +160,27 @@ object Hermit {
 
             if (this.isHermitProject) {
                 log.info(project.name + ": updating hermit status from disk")
-                when(val res =  project.hermitProperties().flatMap { prop -> project.hermitVersion().map { Pair(it, prop) }}) {
-                    is Failure -> {
-                        log.warn(project.name + ": updating hermit status failed: " + res.a)
-                        this.isHermitProject = false
-                        UI.showError(project, res.a)
-                        setStatus(HermitStatus.Failed)
-                    }
-                    is Success -> {
-                        log.info(project.name + ": Hermit version: " + res.b.first)
-                        log.info(project.name + ": updating hermit status succeeded: " + res.b.second.logString())
-                        this.properties = res.b.second
-                        res.b.second.packages.forEach { updateHandlers(it) }
+                val task = BackgroundableWrapper(project, "Updating Hermit Status") {
+                    when(val res = project.hermitProperties().flatMap { prop -> project.hermitVersion().map { Pair(it, prop) }}) {
+                        is Failure -> {
+                            log.warn(project.name + ": updating hermit status failed: " + res.a)
+                            this.isHermitProject = false
+                            ApplicationManager.getApplication().invokeLater {
+                                UI.showError(project, res.a)
+                                setStatus(HermitStatus.Failed)
+                            }
+                        }
+                        is Success -> {
+                            log.info(project.name + ": Hermit version: " + res.b.first)
+                            log.info(project.name + ": updating hermit status succeeded: " + res.b.second.logString())
+                            this.properties = res.b.second
+                            ApplicationManager.getApplication().invokeLater {
+                                res.b.second.packages.forEach { updateHandlers(it) }
+                            }
+                        }
                     }
                 }
+                ProgressManager.getInstance().run(task)
             }
         }
 
