@@ -17,7 +17,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.ThreeState
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
-import java.io.BufferedReader
 import java.lang.reflect.InvocationTargetException
 
 /**
@@ -45,12 +44,12 @@ fun Project.hermitProperties(): Result<HermitProperties> {
     }
     return runBlocking<Result<HermitProperties>> { either {
         val packages = runHermit("list", "-s")
-            .map { it.stdout().readLines() }
+            .map { it.stdout.lines().filter { line -> line.isNotBlank() } }
             .flatMap { packagesFor(it) }
             .bind()
 
         val env = runHermit("env", "-r")
-            .map { it.stdout().readLines() }
+            .map { it.stdout.lines().filter { line -> line.isNotBlank() } }
             .map { environmentFrom(it) }
             .bind()
 
@@ -62,7 +61,7 @@ fun Project.installHermitPackages(): Result<Unit> {
     return if ( !hasHermit() ) {
         success(Unit)
     } else {
-        runHermit("install").map{}
+        runHermit("install").map { }
     }
 }
 
@@ -70,14 +69,8 @@ fun Project.hermitVersion(): Result<String> {
     return if ( !hasHermit() ) {
         success("no hermit found")
     } else {
-        runHermit("version").map{ readText(it.stdout()).trim() }
+        runHermit("version").map { it.stdout.trim() }
     }
-}
-
-private fun readText(from: BufferedReader): String {
-    val result = from.readText()
-    from.close()
-    return result
 }
 
 private fun environmentFrom(lines: List<String>): HashMap<String, String> {
@@ -91,7 +84,7 @@ private fun environmentFrom(lines: List<String>): HashMap<String, String> {
 private fun Project.packagesFor(refs: List<String>): Result<List<HermitPackage>> {
     return if ( refs.nonEmpty() ) {
         runHermit("info", "--json", *refs.toTypedArray())
-            .map { readText(it.stdout()) }
+            .map { it.stdout }
             .flatMap { hermitPackages(Json.parseToJsonElement(it)) }
     } else {
         success(emptyList())
@@ -122,11 +115,16 @@ private fun hermitPackages(js: JsonElement): Result<List<HermitPackage>> {
     }
 }
 
-private fun Process.stdout(): BufferedReader {
-    return  this.inputStream.bufferedReader()
-}
+/**
+ * Result of running a hermit command, with captured stdout and stderr.
+ */
+data class HermitProcessResult(
+    val exitCode: Int,
+    val stdout: String,
+    val stderr: String
+)
 
-private fun Project.runHermit(vararg args: String): Result<Process> {
+private fun Project.runHermit(vararg args: String): Result<HermitProcessResult> {
     if ( !this.hasHermit() ) {
         return failure("No Hermit found in the project")
     }
@@ -137,15 +135,38 @@ private fun Project.runHermit(vararg args: String): Result<Process> {
     commandLine.workDirectory = binDir
     commandLine.environment["HERMIT_ENV"] = binDir?.parent
     val process = commandLine.createProcess()
+    
+    // Drain stdout and stderr concurrently to avoid deadlock when output exceeds pipe buffer (~64KB).
+    // If we wait for the process without draining, hermit blocks on write and we block on waitFor.
+    val stdoutFuture = java.util.concurrent.CompletableFuture.supplyAsync {
+        process.inputStream.bufferedReader().use { it.readText() }
+    }
+    val stderrFuture = java.util.concurrent.CompletableFuture.supplyAsync {
+        process.errorStream.bufferedReader().use { it.readText() }
+    }
+    
     val exitCode = try {
         process.waitFor()
     } catch (e: Exception) {
         return failure("Exception while running $cmd <br/>" + (e.message ?: e.javaClass.simpleName))
     }
+    
+    val stdout = try {
+        stdoutFuture.get()
+    } catch (e: Exception) {
+        return failure("Exception reading stdout from $cmd <br/>" + (e.message ?: e.javaClass.simpleName))
+    }
+    
+    val stderr = try {
+        stderrFuture.get()
+    } catch (e: Exception) {
+        return failure("Exception reading stderr from $cmd <br/>" + (e.message ?: e.javaClass.simpleName))
+    }
+    
     return if ( exitCode != 0 ) {
-        failure("Error while running $cmd <br/>" + readText(process.errorStream.bufferedReader()))
+        failure("Error while running $cmd <br/>$stderr")
     } else {
-        success(process)
+        success(HermitProcessResult(exitCode, stdout, stderr))
     }
 }
 
