@@ -39,7 +39,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolsCustomizer implementation="com.squareup.cash.hermit.execution.HermitToolsCustomiser" />
         <statusBarWidgetFactory id="HermitStatusBarWidgetFactory" implementation="com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidgetFactory"/>
-        <postStartupActivity implementation="com.squareup.cash.hermit.HermitProjectStartupActivity"/>
+        <projectActivity implementation="com.squareup.cash.hermit.HermitProjectStartupActivity"/>
+        <notificationGroup id="Hermit" displayType="BALLOON"/>
     </extensions>
 
     <extensionPoints>
