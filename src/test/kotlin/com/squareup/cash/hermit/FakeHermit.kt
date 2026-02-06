@@ -35,14 +35,11 @@ object BrokenHermit : AbstractHermit() {
 
 data class FakeHermit(val packages: List<TestPackage>) : AbstractHermit() {
     override fun writeTo(path: Path) {
-        val packageList = packages
-            .map { "echo \"${it.name}\"" }
-            .joinToString("\n")
-        val envList = packages
-            .flatMap { it.env.entries }
-            .map { entry ->  "echo \"${entry.key}=${entry.value}\""}
-            .joinToString("\n")
-        val infoList = JsonArray(packages
+        val packageList = packages.joinToString("\n") { "echo \"${it.name}\"" }
+      val envList = packages
+        .flatMap { it.env.entries }
+        .joinToString("\n") { entry -> "echo \"${entry.key}=${entry.value}\"" }
+      val infoList = JsonArray(packages
             .map { p -> JsonObject(mapOf(
                 "Reference" to JsonObject(mapOf(
                     "Name" to JsonPrimitive(p.name),
@@ -54,13 +51,13 @@ data class FakeHermit(val packages: List<TestPackage>) : AbstractHermit() {
             )) }).toString()
 
         val listBlock = if (packageList.isNotEmpty()) """
-            if [ ${'$'}1 == "list" ]; then
+            if [ $1 == "list" ]; then
             $packageList
             fi
         """.trimIndent() else ""
 
         val envBlock = if (envList.isNotEmpty()) """
-            if [ ${'$'}1 == "env" ]; then
+            if [ $1 == "env" ]; then
             $envList
             fi
         """.trimIndent()

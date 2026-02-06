@@ -4,15 +4,20 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.ProjectJdkTable
-import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
-import com.intellij.openapi.util.Disposer
 import com.squareup.cash.hermit.*
+import java.io.File
 
 class HermitJdkUpdater : HermitPropertyHandler {
     private val log: Logger = Logger.getInstance(this.javaClass)
 
     override fun handle(hermitPackage: HermitPackage, project: Project) {
        if (hermitPackage.type == PackageType.JDK) {
+           if (!File(hermitPackage.path).isDirectory) {
+               log.warn("JDK path does not exist: ${hermitPackage.path}, skipping SDK configuration")
+               UI.showError(project, "Hermit JDK path does not exist: ${hermitPackage.path}. " +
+                   "Try running <code>hermit install</code> from the terminal.")
+               return
+           }
            val projectSdk = project.projectSdk()
            if (hermitPackage.sdkName() != projectSdk?.name) {
                log.debug("setting project (" + project.name + ") SDK to " + hermitPackage.logString())
