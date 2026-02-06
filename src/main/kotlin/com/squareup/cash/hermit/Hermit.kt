@@ -205,6 +205,10 @@ object Hermit {
             return bin?.findChild(exe)?.exists() ?: false
         }
 
+        fun findPackage(type: PackageType): HermitPackage? {
+            return this.properties?.packages?.find { it.type == type }
+        }
+
         private fun clear() {
             this.properties = null
             this.isHermitProject = false
