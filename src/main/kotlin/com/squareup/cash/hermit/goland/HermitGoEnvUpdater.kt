@@ -1,7 +1,6 @@
 package com.squareup.cash.hermit.goland
 
 import com.goide.sdk.GoSdkService
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.squareup.cash.hermit.HermitPackage
@@ -9,7 +8,6 @@ import com.squareup.cash.hermit.HermitPropertyHandler
 import com.squareup.cash.hermit.PackageType
 import com.squareup.cash.hermit.UI
 
-@Service
 class HermitGoEnvUpdater : HermitPropertyHandler {
     private val log: Logger = Logger.getInstance(this.javaClass)
 
