@@ -20,7 +20,7 @@ jobs:
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Test
         run: |
-          gradle clean test --stacktrace
+          GRADLE_OPTS="-Xmx4g" gradle clean test --stacktrace
       - name: Get Test report
         uses: actions/upload-artifact@v4
         if: always()
@@ -43,7 +43,7 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Plugin verification
-        run: gradle clean verifyPlugin
+        run: GRADLE_OPTS="-Xmx4g" gradle clean verifyPlugin --info
   verify_old:
     name: Verify Plugin Against Old Releases
     runs-on: ubuntu-latest
@@ -56,4 +56,4 @@ jobs:
       - name: Init Hermit
         run: ./bin/hermit env -r >> $GITHUB_ENV
       - name: Plugin verification
-        run: gradle clean verifyPlugin
+        run: GRADLE_OPTS="-Xmx4g" gradle clean verifyPlugin

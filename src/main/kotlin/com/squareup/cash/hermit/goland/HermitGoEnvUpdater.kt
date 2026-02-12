@@ -13,19 +13,26 @@ class HermitGoEnvUpdater : HermitPropertyHandler {
 
     override fun handle(hermitPackage: HermitPackage, project: Project) {
         if (hermitPackage.type == PackageType.Go) {
-            val sdkService = GoSdkService.getInstance(project);
-            val sdk = sdkService.getSdk(null);
+            try {
+                val sdkService = GoSdkService.getInstance(project);
+                val sdk = sdkService.getSdk(null);
 
-            if (
-                hermitPackage.version != sdk.version
-                || hermitPackage.goURL() != sdk.homeUrl
-                // If the current sdk has the same version,but it was not available before Hermit downloaded it,
-                // set it again to force re-indexing, and marking it as a valid one
-                || !sdk.isValid
-            ) {
-                log.debug("setting project (" + project.name + ") GoSDK to " + hermitPackage.logString())
-                UI.showInfo(project, "Hermit", "Switching to SDK ${hermitPackage.displayName()}")
-                hermitPackage.setSdk(project)
+                if (
+                    sdk.homeUrl.isEmpty()
+                    || hermitPackage.version != sdk.version
+                    || hermitPackage.goURL() != sdk.homeUrl
+                    // If the current sdk has the same version,but it was not available before Hermit downloaded it,
+                    // set it again to force re-indexing, and marking it as a valid one
+                    || !sdk.isValid
+                ) {
+                    log.debug("setting project (" + project.name + ") GoSDK to " + hermitPackage.logString())
+                    UI.showInfo(project, "Hermit", "Switching to SDK ${hermitPackage.displayName()}")
+                    hermitPackage.setSdk(project)
+                }
+            } catch (e: Exception) {
+                log.warn("Failed to update Go SDK - Go plugin may not be properly loaded: ${e.message}")
+                // This can happen when Go plugin dependencies are not met (e.g., missing Ultimate modules)
+                // The plugin should continue to work for other features even if Go SDK management fails
             }
         }
     }

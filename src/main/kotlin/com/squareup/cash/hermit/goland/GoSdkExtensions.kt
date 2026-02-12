@@ -7,7 +7,7 @@ import com.intellij.openapi.project.Project
 import com.squareup.cash.hermit.HermitPackage
 
 fun HermitPackage.setSdk(project: Project): GoSdk {
-    val new = GoSdkImpl(this.goURL(), this.version, this.path + "/src/runtime/internal/sys/zversion.go")
+    val new = GoSdkImpl(this.goURL(), this.version, null)
     GoSdkService.getInstance(project).setSdk(new)
     return new
 }
