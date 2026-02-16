@@ -25,8 +25,17 @@ jobs:
           if [ "$(git rev-list -n 1 main)" == "$(git rev-list -n 1 $TAG)" ]; then
             echo "::set-output name=version::$(echo '')"
           else
-            VERSION="${TAG#v}"
-            echo "::set-output name=version::$(echo "$VERSION")"
+            # Check if changes are only documentation files
+            CHANGED_FILES=$(git diff --name-only $TAG main)
+            NON_DOC_CHANGES=$(echo "$CHANGED_FILES" | grep -v -E '\.(md)$|^docs/|^LICENSE$|^\.gitignore$' || true)
+            
+            if [ -z "$NON_DOC_CHANGES" ]; then
+              echo "Only documentation files changed, skipping release"
+              echo "::set-output name=version::$(echo '')"
+            else
+              VERSION="${TAG#v}"
+              echo "::set-output name=version::$(echo "$VERSION")"
+            fi
           fi
       - name: Bump version and push tag
         if: steps.check-changes.outputs.version != ''
