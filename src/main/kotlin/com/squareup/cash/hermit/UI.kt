@@ -10,24 +10,22 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 
 object UI {
-    private const val NOTIFICATION_GROUP = "Hermit"
-
     fun showError(project: Project, error: String?) {
         val message = error ?: ""
-        val notification = Notification(NOTIFICATION_GROUP, "Hermit Error", message, NotificationType.ERROR)
+        val notification = Notification("", "Hermit Error", message, NotificationType.ERROR)
         Notifications.Bus.notify(notification, project)
     }
 
     fun showInfo(project: Project, title: String, content: String?) {
         val message = content ?: ""
-        val notification = Notification(NOTIFICATION_GROUP, title, message, NotificationType.INFORMATION)
+        val notification = Notification("", title, message, NotificationType.INFORMATION)
         Notifications.Bus.notify(notification, project)
     }
 
     fun askToEnableHermit(project: Project) {
         val actions = ActionManager.getInstance()
         val notification = Notification(
-            NOTIFICATION_GROUP,
+            "",
             "Hermit",
             "Hermit environment detected. Enable Hermit support?",
             NotificationType.INFORMATION
@@ -39,7 +37,7 @@ object UI {
 
     fun explainProjectIsNotTrusted(project: Project) {
         val message = "Untrusted Project: hermit disabled."
-        val notification = Notification(NOTIFICATION_GROUP, "Hermit", message, NotificationType.ERROR)
+        val notification = Notification("", "Hermit", message, NotificationType.ERROR)
 
         notification.addAction(object : NotificationAction("More Information") {
             override fun actionPerformed(e: AnActionEvent, notification: Notification) {

@@ -1,6 +1,7 @@
 package com.squareup.cash.hermit.idea
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.projectRoots.ProjectJdkTable
@@ -8,6 +9,7 @@ import com.intellij.openapi.projectRoots.impl.ProjectJdkImpl
 import com.intellij.openapi.util.Disposer
 import com.squareup.cash.hermit.*
 
+@Service
 class HermitJdkUpdater : HermitPropertyHandler {
     private val log: Logger = Logger.getInstance(this.javaClass)
 
