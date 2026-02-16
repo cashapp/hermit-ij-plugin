@@ -1,7 +1,12 @@
 # Releasing
 
-Changes merged to main are released automatically on a daily basis via a scheduled Github action.
-Once the release process completes, there's a Jetbrains approval process that can take a couple of days.
+## Automatic Releases
+
+Changes merged to main are released automatically daily at 2 AM UTC via a scheduled GitHub workflow. The workflow checks if there are new commits since the last tag, bumps the patch version, and creates a new tag. This triggers the release workflow which publishes to JetBrains marketplace (approval takes a couple days).
+
+Documentation-only changes (*.md files, docs/, LICENSE, .gitignore) will skip the automatic release.
+
+## Manual Releases
 
 Block engineers are able to cut a release on demand if waiting for the daily release is not desirable.
 
