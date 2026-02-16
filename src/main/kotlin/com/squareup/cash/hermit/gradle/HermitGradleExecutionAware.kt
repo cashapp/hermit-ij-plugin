@@ -42,10 +42,23 @@ class HermitGradleExecutionAware: GradleExecutionAware {
     }
   }
 
+  @ApiStatus.OverrideOnly
+  override fun getBuildLayoutParameters(project: Project, projectPath: java.nio.file.Path): BuildLayoutParameters? {
+    return null
+  }
+
+  // Older API with String parameter - keep for compatibility
   override fun getBuildLayoutParameters(project: Project, projectPath: String): BuildLayoutParameters? = null
 
   override fun getDefaultBuildLayoutParameters(project: Project): BuildLayoutParameters? = null
 
+  // Newer API with Path parameter
+  @ApiStatus.OverrideOnly  
+  override fun isGradleInstallationHomeDir(project: Project, homePath: java.nio.file.Path): Boolean {
+    return false
+  }
+
+  // Older API with String parameter - keep for compatibility
   override fun isGradleInstallationHomeDir(project: Project, homePath: String): Boolean = false
 
   companion object {
