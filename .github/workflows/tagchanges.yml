@@ -23,18 +23,18 @@ jobs:
         run: |
           TAG=$(git describe --abbrev=0 --tags)
           if [ "$(git rev-list -n 1 main)" == "$(git rev-list -n 1 $TAG)" ]; then
-            echo "::set-output name=version::$(echo '')"
+            echo "version=" >> $GITHUB_OUTPUT
           else
-            # Check if changes are only documentation files
+            # Check if changes are only non-code files
             CHANGED_FILES=$(git diff --name-only $TAG main)
-            NON_DOC_CHANGES=$(echo "$CHANGED_FILES" | grep -v -E '\.(md)$|^docs/|^LICENSE$|^\.gitignore$' || true)
+            CODE_CHANGES=$(echo "$CHANGED_FILES" | grep -v -E '\.(md|sh)$|^\.github/|^justfile$|^LICENSE$|^\.gitignore$' || true)
             
-            if [ -z "$NON_DOC_CHANGES" ]; then
-              echo "Only documentation files changed, skipping release"
-              echo "::set-output name=version::$(echo '')"
+            if [ -z "$CODE_CHANGES" ]; then
+              echo "Only non-code files changed, skipping release"
+              echo "version=" >> $GITHUB_OUTPUT
             else
               VERSION="${TAG#v}"
-              echo "::set-output name=version::$(echo "$VERSION")"
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
             fi
           fi
       - name: Bump version and push tag

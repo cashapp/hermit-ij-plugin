@@ -4,7 +4,7 @@
 
 Changes merged to main are released automatically daily at 2 AM UTC via a scheduled GitHub workflow. The workflow checks if there are new commits since the last tag, bumps the patch version, and creates a new tag. This triggers the release workflow which publishes to JetBrains marketplace (approval takes a couple days).
 
-Documentation-only changes (*.md files, docs/, LICENSE, .gitignore) will skip the automatic release.
+Non-code changes (*.md, *.sh, .github/, justfile, LICENSE, .gitignore) will skip the automatic release.
 
 ## Manual Releases
 
