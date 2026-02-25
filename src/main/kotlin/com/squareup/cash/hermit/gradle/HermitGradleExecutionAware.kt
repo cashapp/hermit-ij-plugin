@@ -8,6 +8,7 @@ import com.squareup.cash.hermit.Hermit
 import org.jetbrains.annotations.ApiStatus
 import org.jetbrains.plugins.gradle.service.execution.BuildLayoutParameters
 import org.jetbrains.plugins.gradle.service.execution.GradleExecutionAware
+import java.util.concurrent.TimeUnit
 
 class HermitGradleExecutionAware: GradleExecutionAware {
   private val log: Logger = Logger.getInstance(this.javaClass)
@@ -25,7 +26,7 @@ class HermitGradleExecutionAware: GradleExecutionAware {
     if (Hermit(project).hermitStatus() == Hermit.HermitStatus.Installing) {
       log.debug("waiting for 'hermit install' to be finished before continuing with Gradle preparation")
 
-      val start = System.currentTimeMillis()
+      val deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(TIMEOUT_MS)
       var waitMS = 10L
       while (true) {
         Thread.sleep(waitMS)
@@ -33,7 +34,7 @@ class HermitGradleExecutionAware: GradleExecutionAware {
           break
         }
         if (waitMS < 500L) waitMS *= 2
-        if (System.currentTimeMillis() - start > TIMEOUT_MS) {
+        if (System.nanoTime() >= deadlineNanos) {
           log.warn("timed out while waiting for 'hermit install' to finish")
           break
         }
@@ -49,6 +50,6 @@ class HermitGradleExecutionAware: GradleExecutionAware {
   override fun isGradleInstallationHomeDir(project: Project, homePath: String): Boolean = false
 
   companion object {
-    const val TIMEOUT_MS = 120000
+    const val TIMEOUT_MS = 120_000L
   }
 }
