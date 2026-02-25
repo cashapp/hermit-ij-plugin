@@ -14,12 +14,10 @@ class HermitVFSChangeListener(val project: Project) : BulkFileListener {
         var needsUpdating = false
         events.forEach {
             it.file?.let { file ->
-                log.debug("Checking if file [${file.path}] is in projects " +
-                    "${Hermit.allProjects().map { state -> state.project.name }}")
-                // The project might have been disposed since looking up Hermit.allProjects.
-                log.debug("Project [${project.name}] is disposed: [${project.isDisposed}]")
                 if (!project.isDisposed && isHermitChange(project, file)) {
-                    log.debug("Project [${project.name}] needs updating")
+                    if (log.isDebugEnabled) {
+                        log.debug("Project [${project.name}] needs updating due to file [${file.path}]")
+                    }
                     needsUpdating = true
                 }
             }
