@@ -52,6 +52,7 @@ class HermitGradleEnvProviderTest : HermitProjectTestCase() {
 
     assertEquals("/hermit/jdk/home", settings.env["JAVA_HOME"])
     assertEquals("/project/bin", settings.env["HERMIT_BIN"])
+    assertEquals("/hermit/jdk/home", settings.javaHome)
   }
 
   @Test fun `test configureTasks does not modify settings when hermit is not present`() {
@@ -59,6 +60,7 @@ class HermitGradleEnvProviderTest : HermitProjectTestCase() {
     provider.configureTasks("", taskId(), settings, null)
 
     assertTrue(settings.env.isEmpty())
+    assertNull(settings.javaHome)
   }
 
   @Test fun `test configureTasks does not modify settings when hermit has no env vars`() {
@@ -72,6 +74,7 @@ class HermitGradleEnvProviderTest : HermitProjectTestCase() {
     provider.configureTasks("", taskId(), settings, null)
 
     assertTrue(settings.env.isEmpty())
+    assertNull(settings.javaHome)
   }
 
   @Test fun `test configureTasks preserves existing env vars in settings`() {
@@ -89,6 +92,7 @@ class HermitGradleEnvProviderTest : HermitProjectTestCase() {
 
     assertEquals("/hermit/jdk/home", settings.env["JAVA_HOME"])
     assertEquals("existing_value", settings.env["EXISTING_VAR"])
+    assertEquals("/hermit/jdk/home", settings.javaHome)
   }
 
   @Test fun `test configureTasks overrides existing JAVA_HOME with hermit value`() {
@@ -102,9 +106,11 @@ class HermitGradleEnvProviderTest : HermitProjectTestCase() {
 
     val settings = GradleExecutionSettings()
     settings.withEnvironmentVariables(mapOf("JAVA_HOME" to "/user/old/jdk"))
+    settings.javaHome = "/ide/bundled/jbr"
     provider.configureTasks("", taskId(), settings, null)
 
     assertEquals("/hermit/jdk/home", settings.env["JAVA_HOME"])
+    assertEquals("/hermit/jdk/home", settings.javaHome)
   }
 
   @Test fun `test configureTasks injects multiple env vars from multiple packages`() {
@@ -143,6 +149,7 @@ class HermitGradleEnvProviderTest : HermitProjectTestCase() {
 
     assertEquals("/hermit/jdk/home", settings.env["JAVA_HOME"])
     assertEquals("/project", settings.env["HERMIT_ENV"])
+    assertEquals("/hermit/jdk/home", settings.javaHome)
   }
 
   @Test fun `test injectHermitEnvironment skips when hermit is not present`() {
@@ -150,6 +157,7 @@ class HermitGradleEnvProviderTest : HermitProjectTestCase() {
     HermitGradleEnvProvider.injectHermitEnvironment(project, settings, "test")
 
     assertTrue(settings.env.isEmpty())
+    assertNull(settings.javaHome)
   }
 
   @Test fun `test injectHermitEnvironment overrides existing JAVA_HOME`() {
@@ -163,8 +171,25 @@ class HermitGradleEnvProviderTest : HermitProjectTestCase() {
 
     val settings = GradleExecutionSettings()
     settings.withEnvironmentVariables(mapOf("JAVA_HOME" to "/user/old/jdk"))
+    settings.javaHome = "/ide/bundled/jbr"
     HermitGradleEnvProvider.injectHermitEnvironment(project, settings, "test")
 
     assertEquals("/hermit/jdk/home", settings.env["JAVA_HOME"])
+    assertEquals("/hermit/jdk/home", settings.javaHome)
+  }
+
+  @Test fun `test injectHermitEnvironment does not set javaHome when no JAVA_HOME in env`() {
+    withHermit(FakeHermit(listOf(
+      TestPackage("gradle", "9.3.1", "", "/gradle/path", mapOf(
+        "GRADLE_HOME" to "/hermit/gradle/home"
+      ))
+    )))
+    Hermit(project).enable()
+    waitAppThreads()
+
+    val settings = GradleExecutionSettings()
+    HermitGradleEnvProvider.injectHermitEnvironment(project, settings, "test")
+
+    assertNull(settings.javaHome)
   }
 }

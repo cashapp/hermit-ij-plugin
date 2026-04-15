@@ -48,6 +48,15 @@ class HermitGradleEnvProvider : GradleTaskManagerExtension {
             if (env.isNotEmpty()) {
                 log.debug("injecting ${env.size} Hermit environment variables into $context")
                 settings.withEnvironmentVariables(env)
+
+                // Also set the Gradle daemon launcher JVM to the hermit JDK.
+                // withEnvironmentVariables only affects the env of the spawned process,
+                // but the IDE picks the JVM binary from settings.javaHome separately.
+                val javaHome = env["JAVA_HOME"]
+                if (javaHome != null) {
+                    log.debug("setting Gradle JVM home to $javaHome for $context")
+                    settings.javaHome = javaHome
+                }
             }
         }
     }
