@@ -7,11 +7,11 @@ version = project.properties["version"] ?: "1.0-SNAPSHOT"
 
 plugins {
   id("java")
-  kotlin("kapt") version "2.0.21"
+  kotlin("kapt") version "2.3.20"
   id("org.jetbrains.intellij.platform") version "2.14.0"
 
-  id("org.jetbrains.kotlin.jvm") version "2.0.21"
-  id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
+  id("org.jetbrains.kotlin.jvm") version "2.3.20"
+  id("org.jetbrains.kotlin.plugin.serialization") version "2.3.20"
 }
 
 // region Build, dependencies
@@ -57,7 +57,7 @@ val product = products.first { it.releaseType == (System.getenv("RELEASE_TYPE") 
 
 val verifyOldVersions = System.getenv("VERIFY_VERSIONS") == "old"
 
-val kotlinVersion = "2.0.21"
+val kotlinVersion = "2.3.20"
 val arrowVersion = "0.11.0"
 
 dependencies {
@@ -83,7 +83,7 @@ dependencies {
 
   implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
   implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
   implementation("io.arrow-kt:arrow-core:$arrowVersion")
   implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
   kapt("io.arrow-kt:arrow-meta:$arrowVersion")
