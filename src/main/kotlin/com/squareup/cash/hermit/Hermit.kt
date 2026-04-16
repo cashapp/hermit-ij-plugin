@@ -120,8 +120,8 @@ object Hermit {
             val task = BackgroundableWrapper(project, "Installing Hermit Packages") {
                 when (val result = project.installHermitPackages()) {
                     is Failure -> {
-                        log.warn(project.name + ": installing hermit packages failed: " + result.a)
-                        UI.showError(project, result.a)
+                        log.warn(project.name + ": installing hermit packages failed: " + result.value)
+                        UI.showError(project, result.value)
                         setStatus(HermitStatus.Failed)
                     }
                     is Success -> {
@@ -163,19 +163,19 @@ object Hermit {
                 val task = BackgroundableWrapper(project, "Updating Hermit Status") {
                     when(val res = project.hermitProperties().flatMap { prop -> project.hermitVersion().map { Pair(it, prop) }}) {
                         is Failure -> {
-                            log.warn(project.name + ": updating hermit status failed: " + res.a)
+                            log.warn(project.name + ": updating hermit status failed: " + res.value)
                             this.isHermitProject = false
                             ApplicationManager.getApplication().invokeLater {
-                                UI.showError(project, res.a)
+                                UI.showError(project, res.value)
                                 setStatus(HermitStatus.Failed)
                             }
                         }
                         is Success -> {
-                            log.info(project.name + ": Hermit version: " + res.b.first)
-                            log.info(project.name + ": updating hermit status succeeded: " + res.b.second.logString())
-                            this.properties = res.b.second
+                            log.info(project.name + ": Hermit version: " + res.value.first)
+                            log.info(project.name + ": updating hermit status succeeded: " + res.value.second.logString())
+                            this.properties = res.value.second
                             ApplicationManager.getApplication().invokeLater {
-                                res.b.second.packages.forEach { updateHandlers(it) }
+                                res.value.second.packages.forEach { updateHandlers(it) }
                             }
                         }
                     }

@@ -1,13 +1,9 @@
 package com.squareup.cash.hermit
 
 import arrow.core.Either
-import arrow.core.extensions.list.foldable.nonEmpty
 import arrow.core.flatMap
-import arrow.core.computations.either
-import arrow.core.extensions.either.applicative.applicative
-import arrow.core.extensions.list.traverse.traverse
-import arrow.core.fix
 import arrow.core.getOrElse
+import arrow.core.raise.either
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
@@ -15,7 +11,6 @@ import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.ThreeState
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import java.lang.reflect.InvocationTargetException
 
@@ -42,7 +37,7 @@ fun Project.hermitProperties(): Result<HermitProperties> {
     if ( !hasHermit() ) {
         return success(HermitProperties(emptyMap(), emptyList()))
     }
-    return runBlocking<Result<HermitProperties>> { either {
+    return either {
         val packages = runHermit("list", "-s")
             .map { it.stdout.lines().filter { line -> line.isNotBlank() } }
             .flatMap { packagesFor(it) }
@@ -54,7 +49,7 @@ fun Project.hermitProperties(): Result<HermitProperties> {
             .bind()
 
         HermitProperties(env, packages)
-    } }
+    }
 }
 
 fun Project.installHermitPackages(): Result<Unit> {
@@ -82,7 +77,7 @@ private fun environmentFrom(lines: List<String>): HashMap<String, String> {
 }
 
 private fun Project.packagesFor(refs: List<String>): Result<List<HermitPackage>> {
-    return if ( refs.nonEmpty() ) {
+    return if ( refs.isNotEmpty() ) {
         runHermit("info", "--json", *refs.toTypedArray())
             .map { it.stdout }
             .flatMap { hermitPackages(Json.parseToJsonElement(it)) }
@@ -93,8 +88,8 @@ private fun Project.packagesFor(refs: List<String>): Result<List<HermitPackage>>
 
 private fun hermitPackages(js: JsonElement): Result<List<HermitPackage>> {
     return js.asArray().flatMap { array ->
-        array.traverse(Either.applicative()) { elem ->
-            runBlocking<Result<HermitPackage>> { either {
+        either {
+            array.map { elem ->
                 val obj = elem.asObject().bind()
                 val ref = obj.field("Reference").flatMap { it.asObject() }.bind()
                 val name = ref.field("Name").flatMap { it.asPrimitive() }.map { it.nullableString() }.bind()
@@ -110,8 +105,8 @@ private fun hermitPackages(js: JsonElement): Result<List<HermitPackage>> {
                     else -> PackageType.Unknown
                 }
                 HermitPackage(name, version, root, type, channel)
-            }}
-        }.fix().map { it.fix() }
+            }
+        }
     }
 }
 
