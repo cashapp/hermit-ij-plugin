@@ -54,15 +54,16 @@ updateIfNeeded() {
     echo "Upgrading ${typeCode} (${releaseType}) to ${latest}"
     setVersion "$typeCode" "$latest" "$releaseType"
 
-    goPluginVersion=$(findLatestGoPluginVersion "${latestMajor}")
-    sed -i.bak "s/^${typeCode}\.${releaseType}\.go_plugin\.version=.*$/${typeCode}.${releaseType}.go_plugin.version=${goPluginVersion}/g" gradle.properties
+    if [ "$typeCode" = "IIU" ]; then
+      goPluginVersion=$(findLatestGoPluginVersion "${latestMajor}")
+      sed -i.bak "s/^${typeCode}\.${releaseType}\.go_plugin\.version=.*$/${typeCode}.${releaseType}.go_plugin.version=${goPluginVersion}/g" gradle.properties
+    fi
   else
     echo "No upgrade needed for ${typeCode} ${releaseType}"
   fi
 }
 
-updateIfNeeded IIC release
-updateIfNeeded IIC eap
+updateIfNeeded IIU release
+updateIfNeeded IIU eap
 updateIfNeeded GO release
 updateIfNeeded GO eap
-

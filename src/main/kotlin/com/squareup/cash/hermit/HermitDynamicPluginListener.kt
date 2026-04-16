@@ -12,4 +12,10 @@ class HermitDynamicPluginListener : DynamicPluginListener {
             projects.forEach { Hermit(it).open() }
         }
     }
+
+    // Explicit overrides to avoid Kotlin generating invokespecial bridges to
+    // default methods that don't exist in older platform versions (251).
+    override fun beforePluginsLoaded() {}
+    override fun pluginsLoaded() {}
+    override fun checkUnloadPlugin(pluginDescriptor: IdeaPluginDescriptor) {}
 }
