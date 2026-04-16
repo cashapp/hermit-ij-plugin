@@ -63,7 +63,6 @@ val arrowVersion = "0.11.0"
 dependencies {
   intellijPlatform {
     intellijIdeaUltimate(product.sdkVersion) { useInstaller = false }
-    pluginVerifier("1.378")
     plugins(
       "org.jetbrains.plugins.go:${product.goPluginVersion}"
     )
