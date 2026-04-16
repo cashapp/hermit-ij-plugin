@@ -15,9 +15,8 @@ plugins {
 
 // region Build, dependencies
 
-java {
-  sourceCompatibility = JavaVersion.VERSION_17
-  targetCompatibility = JavaVersion.VERSION_17
+tasks.withType<JavaCompile> {
+  options.release = 21
 }
 
 repositories {
@@ -90,8 +89,11 @@ dependencies {
 
 kotlin {
   compilerOptions {
-    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
+    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    freeCompilerArgs = listOf(
+      "-Xjvm-default=all-compatibility",
+      "-Xjdk-release=21",
+    )
   }
 }
 
