@@ -8,7 +8,7 @@ version = project.properties["version"] ?: "1.0-SNAPSHOT"
 plugins {
   id("java")
   kotlin("kapt") version "2.0.21"
-  id("org.jetbrains.intellij.platform") version "2.3.0"
+  id("org.jetbrains.intellij.platform") version "2.14.0"
 
   id("org.jetbrains.kotlin.jvm") version "2.0.21"
   id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
@@ -62,7 +62,7 @@ val arrowVersion = "0.11.0"
 
 dependencies {
   intellijPlatform {
-    intellijIdeaUltimate(product.sdkVersion, useInstaller = false)
+    intellijIdeaUltimate(product.sdkVersion) { useInstaller = false }
     pluginVerifier("1.378")
     plugins(
       "org.jetbrains.plugins.go:${product.goPluginVersion}"
@@ -72,8 +72,12 @@ dependencies {
       "com.intellij.java",
       "com.intellij.properties",
       // Needed by Go plugin. See https://github.com/JetBrains/gradle-intellij-plugin/issues/1056
-      "org.intellij.intelliLang"
+      "org.intellij.intelliLang",
     )
+    // Required transitive dependencies of the Go plugin that aren't auto-resolved.
+    // See https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1930
+    testBundledPlugins("com.intellij.modules.json")
+    testBundledModule("intellij.platform.vcs.impl")
     testFramework(TestFrameworkType.Bundled, product.sdkVersion)
   }
 
