@@ -145,7 +145,9 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         Hermit(project).enable()
         waitAppThreads()
 
-        val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
+        // Create widget directly: StatusBarWidgetsManager.updateWidget() won't register widgets
+        // in tests because wasInitialized is false (init(frame) never runs without an IdeFrame).
+        val widget = HermitStatusBarWidget(project)
         val presentation = widget.getPresentation() as HermitStatusBarPresentation
         TestCase.assertEquals("Hermit enabled", presentation.getText())
     }
@@ -156,7 +158,7 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         Hermit(project).enable()
         waitAppThreads()
 
-        val widget = WindowManager.getInstance().getStatusBar(project)?.getWidget(HermitStatusBarWidget.ID)!!
+        val widget = HermitStatusBarWidget(project)
         val presentation = widget.getPresentation() as HermitStatusBarPresentation
         TestCase.assertEquals("Hermit failed", presentation.getText())
     }

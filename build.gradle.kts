@@ -37,17 +37,17 @@ data class Product(
 val products = listOf(
   Product(
     releaseType = "release",
-    sdkVersion = properties["IIC.release.version"] as String,
-    goPluginVersion = properties["IIC.release.go_plugin.version"] as String,
-    intellijVersion = properties["IIC.release.version"] as String,
+    sdkVersion = properties["IIU.release.version"] as String,
+    goPluginVersion = properties["IIU.release.go_plugin.version"] as String,
+    intellijVersion = properties["IIU.release.version"] as String,
     golandVersion = properties["GO.release.version"] as String,
   ),
   Product(
     releaseType = "eap",
     // "<major version>-EAP-SNAPSHOT"
-    sdkVersion = "${(properties["IIC.eap.version"] as String).split(".")[0]}-EAP-SNAPSHOT",
-    goPluginVersion = properties["IIC.eap.go_plugin.version"] as String,
-    intellijVersion = properties["IIC.eap.version"] as String,
+    sdkVersion = "${(properties["IIU.eap.version"] as String).split(".")[0]}-EAP-SNAPSHOT",
+    goPluginVersion = properties["IIU.eap.go_plugin.version"] as String,
+    intellijVersion = properties["IIU.eap.version"] as String,
     golandVersion = properties["GO.eap.version"] as String,
   ),
 )
@@ -60,7 +60,7 @@ val arrowVersion = "2.2.2.1"
 
 dependencies {
   intellijPlatform {
-    intellijIdeaUltimate(product.sdkVersion) { useInstaller = false }
+    intellijIdea(product.sdkVersion) { useInstaller = false }
     plugins(
       "org.jetbrains.plugins.go:${product.goPluginVersion}"
     )
@@ -70,12 +70,15 @@ dependencies {
       "com.intellij.properties",
       // Needed by Go plugin. See https://github.com/JetBrains/gradle-intellij-plugin/issues/1056
       "org.intellij.intelliLang",
+      // Required by the Go plugin; ships as a bundled plugin in the unified IDE.
+      "com.intellij.modules.ultimate",
     )
     // Required transitive dependencies of the Go plugin that aren't auto-resolved.
     // See https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1930
     testBundledPlugins("com.intellij.modules.json")
     testBundledModule("intellij.platform.vcs.impl")
-    testFramework(TestFrameworkType.Bundled, product.sdkVersion)
+    testFramework(TestFrameworkType.Platform)
+    testFramework(TestFrameworkType.Plugin.Java)
   }
 
   implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
@@ -112,14 +115,16 @@ intellijPlatform {
   //type.set("IU")
 
   pluginVerification {
+    ignoredProblemsFile = project.file("verifier-ignore.txt")
     // These need to match the versions from
-    // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIC,IIE,GO
+    // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIU,GO
     if (verifyOldVersions) {
       ides {
         select {
+          // Use IntellijIdeaUltimate for pre-unification builds (251 and earlier)
           types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
-          sinceBuild = project.properties["IIC.from.version"] as String
-          untilBuild = project.properties["IIC.from.version"] as String
+          sinceBuild = project.properties["IIU.from.version"] as String
+          untilBuild = project.properties["IIU.from.version"] as String
         }
         select {
           types = listOf(IntelliJPlatformType.GoLand)
@@ -130,7 +135,7 @@ intellijPlatform {
     } else {
       ides {
         select {
-          types = listOf(IntelliJPlatformType.IntellijIdeaUltimate)
+          types = listOf(IntelliJPlatformType.IntellijIdea)
           sinceBuild = product.intellijVersion
           untilBuild = product.intellijVersion
         }
@@ -146,7 +151,7 @@ intellijPlatform {
 
 tasks {
   patchPluginXml {
-    sinceBuild.set(project.properties["IIC.from.version"] as String)
+    sinceBuild.set(project.properties["IIU.from.version"] as String)
     val versionSuffix = when(product.releaseType) {
       "release" -> ""
       else -> "-${product.releaseType}"

@@ -1,0 +1,12 @@
+// False positives from a plugin verifier bug where optional dependencies aren't
+// tracked when a transitive dependency encounters them first during DFS resolution.
+// See: https://github.com/JetBrains/intellij-plugin-verifier/pull/XXX
+//
+// These classes are guarded by <depends optional="true">com.intellij.java</depends>
+// and are expected to be unresolved in GoLand which doesn't bundle the Java plugin.
+//
+// Format: <plugin-id>:<version>:<problem-description-regex>
+// Empty version field matches all versions.
+org.squareup.cash.hermit.idea-plugin::Access to unresolved class com.intellij.execution.RunConfigurationExtension
+org.squareup.cash.hermit.idea-plugin::Access to unresolved class com.intellij.openapi.projectRoots.JavaSdk
+org.squareup.cash.hermit.idea-plugin::Access to unresolved class com.intellij.execution.configurations.JavaParameters
