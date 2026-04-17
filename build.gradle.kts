@@ -115,6 +115,7 @@ intellijPlatform {
   //type.set("IU")
 
   pluginVerification {
+    ignoredProblemsFile = project.file("verifier-ignore.txt")
     // These need to match the versions from
     // https://data.services.jetbrains.com/products?fields=code,name,releases.downloads,releases.version,releases.build,releases.type&code=IIU,GO
     if (verifyOldVersions) {
