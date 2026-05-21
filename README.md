@@ -1,7 +1,7 @@
 # Hermit IntelliJ plugin
 
 This IntelliJ plugin provides configuration from the project's Hermit environment to the IDE. 
-It is supported both in Idea and GoLand.
+It is supported in both Idea and GoLand.
 
 ## Features
 
