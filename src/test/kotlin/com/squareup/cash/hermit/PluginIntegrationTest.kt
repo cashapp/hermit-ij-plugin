@@ -11,6 +11,7 @@ import com.squareup.cash.hermit.gradle.GradleUtils
 import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarPresentation
 import com.squareup.cash.hermit.ui.statusbar.HermitStatusBarWidget
 import junit.framework.TestCase
+import org.jetbrains.plugins.gradle.settings.DistributionType
 import org.junit.Test
 
 class PluginIntegrationTest : HermitProjectTestCase() {
@@ -93,6 +94,23 @@ class PluginIntegrationTest : HermitProjectTestCase() {
         waitAppThreads()
 
         TestCase.assertEquals("/root", GradleUtils.findGradleProjectSettings(project)?.gradleHome)
+    }
+
+    @Test fun `test it reverts a stale local Gradle config to the wrapper when hermit no longer manages Gradle`() {
+        withHermit(FakeHermit(listOf(TestPackage("gradle", "1.0", "", "/root", emptyMap()))))
+        Hermit(project).enable()
+        waitAppThreads()
+
+        TestCase.assertEquals("/root", GradleUtils.findGradleProjectSettings(project)?.gradleHome)
+        TestCase.assertEquals(DistributionType.LOCAL, GradleUtils.findGradleProjectSettings(project)?.distributionType)
+
+        // Gradle is no longer managed by hermit
+        withHermit(FakeHermit(listOf(TestPackage("name", "version", "", "root", mapOf(Pair("FOO", "BAR"))))))
+        Hermit(project).enable()
+        waitAppThreads()
+
+        TestCase.assertEquals(DistributionType.DEFAULT_WRAPPED, GradleUtils.findGradleProjectSettings(project)?.distributionType)
+        TestCase.assertNull(GradleUtils.findGradleProjectSettings(project)?.gradleHome)
     }
 
     @Test fun `test it sets the Gradle JDK home correctly, if both JDK and Gradle are present`() {

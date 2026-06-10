@@ -175,7 +175,9 @@ object Hermit {
                             log.info(project.name + ": updating hermit status succeeded: " + res.value.second.logString())
                             this.properties = res.value.second
                             ApplicationManager.getApplication().invokeLater {
-                                res.value.second.packages.forEach { updateHandlers(it) }
+                                val packages = res.value.second.packages
+                                packages.forEach { updateHandlers(it) }
+                                reconcileHandlers(packages)
                             }
                         }
                     }
@@ -217,6 +219,12 @@ object Hermit {
         private fun updateHandlers(hermitPackage: HermitPackage) {
             HANDLER_EP_NAME.extensions.forEach {
                 it.handle(hermitPackage, project)
+            }
+        }
+
+        private fun reconcileHandlers(packages: List<HermitPackage>) {
+            HANDLER_EP_NAME.extensions.forEach {
+                it.reconcile(packages, project)
             }
         }
     }
